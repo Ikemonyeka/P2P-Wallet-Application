@@ -1,0 +1,17 @@
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\P2PWallet.Services.csproj.AssemblyReference.cache
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\P2PWallet.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\P2PWallet.Services.AssemblyInfoInputs.cache
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\P2PWallet.Services.AssemblyInfo.cs
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\P2PWallet.Services.csproj.CoreCompileInputs.cache
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\bin\Debug\net6.0\P2PWallet.Services.deps.json
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\bin\Debug\net6.0\P2PWallet.Services.runtimeconfig.json
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\bin\Debug\net6.0\P2PWallet.Services.dll
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\bin\Debug\net6.0\P2PWallet.Services.pdb
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\bin\Debug\net6.0\P2PWallet.Models.dll
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\bin\Debug\net6.0\P2PWallet.Models.pdb
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\P2PWallet.Services.csproj.CopyComplete
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\P2PWallet.Services.dll
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\refint\P2PWallet.Services.dll
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\P2PWallet.Services.pdb
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\P2PWallet.Services.genruntimeconfig.cache
+C:\Users\ikemo\source\repos\P2PWallet\P2PWallet.Services\obj\Debug\net6.0\ref\P2PWallet.Services.dll

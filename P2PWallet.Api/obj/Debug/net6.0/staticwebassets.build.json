@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "Hash": "8+9HhlOl0ywkkGa8etEqs5cwDSgNzutmi/T1UxmG4sk=",
+  "Source": "P2PWallet.Api",
+  "BasePath": "_content/P2PWallet.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "P2PWallet.Api\\wwwroot",
+      "Source": "P2PWallet.Api",
+      "ContentRoot": "C:\\Users\\ikemo\\source\\repos\\P2PWallet\\P2PWallet.Api\\wwwroot\\",
+      "BasePath": "_content/P2PWallet.Api",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\ikemo\\source\\repos\\P2PWallet\\P2PWallet.Api\\wwwroot\\Templates\\EmailTemplate\\ReceiverTransferEmailTemplate.html",
+      "SourceId": "P2PWallet.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\ikemo\\source\\repos\\P2PWallet\\P2PWallet.Api\\wwwroot\\",
+      "BasePath": "_content/P2PWallet.Api",
+      "RelativePath": "Templates/EmailTemplate/ReceiverTransferEmailTemplate.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Templates\\EmailTemplate\\ReceiverTransferEmailTemplate.html"
+    },
+    {
+      "Identity": "C:\\Users\\ikemo\\source\\repos\\P2PWallet\\P2PWallet.Api\\wwwroot\\Templates\\EmailTemplate\\SenderTransferEmailTemplate.html",
+      "SourceId": "P2PWallet.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\ikemo\\source\\repos\\P2PWallet\\P2PWallet.Api\\wwwroot\\",
+      "BasePath": "_content/P2PWallet.Api",
+      "RelativePath": "Templates/EmailTemplate/SenderTransferEmailTemplate.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Templates\\EmailTemplate\\SenderTransferEmailTemplate.html"
+    }
+  ]
+}
