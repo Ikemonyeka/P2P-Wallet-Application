@@ -11,5 +11,6 @@ namespace P2PWallet.Services.Interfaces
     {
         Task creditEmail(ReceiverEmailDto receiverEmailDto);
         Task debitEmail(SenderEmailDto senderEmailDto);
+        Task<bool> VerificationEmail(VerifyEmailDto verifyEmailDto, string token);
     }
 }

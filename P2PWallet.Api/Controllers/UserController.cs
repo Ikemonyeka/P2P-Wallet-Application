@@ -76,5 +76,16 @@ namespace P2PWallet.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("confirm-email")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<LoginView>> VerifyEmail(string uemail, string utoken)
+        {
+            var result = await _userService.VerifyEmail(uemail, utoken);
+
+            return Ok(result);
+        }
     }
 }
+
+

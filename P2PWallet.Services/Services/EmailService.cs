@@ -1,11 +1,13 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic;
 using MimeKit;
 using MimeKit.Text;
 using P2PWallet.Models.DataObjects;
+using P2PWallet.Models.Entities;
 using P2PWallet.Services.Data;
 using P2PWallet.Services.Interfaces;
 using System;
@@ -22,12 +24,14 @@ namespace P2PWallet.Services.Services
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly DataContext _context;
+        private readonly LinkGenerator _linkGenerator;
 
-        public EmailService(IConfiguration configuration, IWebHostEnvironment webHostEnvironment, DataContext context)
+        public EmailService(IConfiguration configuration, IWebHostEnvironment webHostEnvironment, DataContext context, LinkGenerator linkGenerator)
         {
             _configuration = configuration;
             _webHostEnvironment = webHostEnvironment;
             _context = context;
+            _linkGenerator = linkGenerator;
         }
         public async Task creditEmail(ReceiverEmailDto receiverEmailDto)
         {
@@ -93,6 +97,40 @@ namespace P2PWallet.Services.Services
             smtp.Authenticate(_configuration.GetSection("EmailDetails:EmailUsername").Value, _configuration.GetSection("EmailDetails:EmailPassword").Value);
             smtp.Send(email);
             smtp.Disconnect(true);
+        }
+
+        public async Task<bool> VerificationEmail(VerifyEmailDto verifyEmailDto, string token)
+        {
+
+            try
+            {
+                var Hosturl = _configuration.GetSection("EmailDetails:EmailLocalHost").Value;
+                var Curl = _configuration.GetSection("EmailDetails:EmailConfirmation").Value;
+
+
+                string HtmlBody = "";
+                StreamReader reader = new StreamReader("C:\\Users\\ikemo\\source\\repos\\P2PWallet\\P2PWallet.Api\\wwwroot\\Templates\\EmailTemplate\\EmailVerify.html");
+                HtmlBody = reader.ReadToEnd();
+                HtmlBody = HtmlBody.Replace("{Link}", string.Format(Hosturl + Curl, verifyEmailDto.Email, verifyEmailDto.Token));
+
+                var email = new MimeMessage();
+                email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EmailDetails:DefaultEmail").Value));
+                email.To.Add(MailboxAddress.Parse(verifyEmailDto.Email));
+                email.Subject = "Email Verification";
+                email.Body = new TextPart(TextFormat.Html) { Text = HtmlBody };
+
+                using var smtp = new SmtpClient();
+                smtp.Connect(_configuration.GetSection("EmailDetails:EmailHost").Value, 587, SecureSocketOptions.StartTls);
+                smtp.Authenticate(_configuration.GetSection("EmailDetails:EmailUsername").Value, _configuration.GetSection("EmailDetails:EmailPassword").Value);
+                smtp.Send(email);
+                smtp.Disconnect(true);
+
+                return true;
+            }
+            catch 
+            {
+                return false;
+            }
         }
     }
 }

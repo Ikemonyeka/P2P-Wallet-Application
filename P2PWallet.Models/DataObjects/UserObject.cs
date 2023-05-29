@@ -11,6 +11,7 @@ namespace P2PWallet.Models.DataObjects
         public class UserView
         {
             public string message { get; set; } = string.Empty;
+            public string data { get; set; } 
             public bool status { get; set; }
 
         }

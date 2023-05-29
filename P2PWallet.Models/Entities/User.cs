@@ -15,6 +15,10 @@ namespace P2PWallet.Models.Entities
         public byte[]? PinHash { get; set; }
         public byte[]? PinSalt { get; set; }
         public string Email { get; set; } = string.Empty;
+        public string? VerificationToken { get; set; }
+        public DateTime? VerifiedAt { get; set; }
+        public string? PasswordResetToken { get; set; }
+        public DateTime? ResetTokenExpires { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string firstName { get; set; } = string.Empty;
         public string lastName { get; set; } = string.Empty;

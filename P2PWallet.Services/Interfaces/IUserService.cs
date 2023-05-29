@@ -1,4 +1,5 @@
-﻿using P2PWallet.Models.DataObjects;
+﻿using Microsoft.EntityFrameworkCore;
+using P2PWallet.Models.DataObjects;
 using P2PWallet.Models.Entities;
 using System;
 using System.Collections.Generic;
@@ -17,5 +18,34 @@ namespace P2PWallet.Services.Interfaces
         Task<UserView> CheckPin();
         Task<UserView> CreatePin(PinDto pinDto);
         Task<UserView> VerifyPin(PinDto pinDto);
+        Task<ActionResult<LoginView>> VerifyEmail(string uemail, string utoken);
     }
 }
+
+
+//public async Task<LoginView> GetVToken()
+//{
+//    User user = new User();
+//    LoginView view = new LoginView();
+//    VerifyEmailDto verifyEmailDto = new VerifyEmailDto();
+
+//    var data = await _context.Users.Where(tokenCheck => tokenCheck.Email == verifyEmailDto.Email)
+//        .Select(tokenCheck => new VerifyEmailDto
+//        {
+//            Token = tokenCheck.VerificationToken
+//        })
+//        .FirstAsync();
+
+//    if (data == null)
+//    {
+//        view.status = false;
+//        view.message = "Registration/Token Error";
+//        return view;
+//    }
+
+//    view.status = true;
+//    view.message = data.ToString();
+
+//    return view;
+
+//}

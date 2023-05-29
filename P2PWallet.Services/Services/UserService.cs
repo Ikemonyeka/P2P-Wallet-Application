@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -17,6 +18,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
 using static P2PWallet.Models.DataObjects.PaystackFundObject;
@@ -30,13 +32,15 @@ namespace P2PWallet.Services.Services
     {
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(DataContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<UserService> logger)
+        public UserService(DataContext context, IConfiguration configuration, IEmailService emailService, IHttpContextAccessor httpContextAccessor, ILogger<UserService> logger)
         {
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _logger.LogDebug(1, "NLog injected into UserService");
@@ -112,9 +116,25 @@ namespace P2PWallet.Services.Services
             return AcctNumber.ToString();
         }
 
+        private static string VerficationGen()
+        {
+            const string src = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            int length = 40;
+            var sb = new StringBuilder();
+            Random RNG = new Random();
+            for (var i = 0; i < length; i++)
+            {
+                var c = src[RNG.Next(0, src.Length)];
+                sb.Append(c);
+            }
+            return sb.ToString();
+        }
+
         public async Task<UserView> RegisterUser(UserDto user)
         {
             UserView users = new UserView();
+            VerifyEmailDto verifyEmailDto = new VerifyEmailDto();
+
             try
             {
                 CreatePasswordHash(user.Password, out byte[] passwordHash, out byte[] passwordSalt);
@@ -141,13 +161,27 @@ namespace P2PWallet.Services.Services
                     PhoneNumber = user.PhoneNumber,
                     firstName = user.firstName,
                     lastName = user.lastName,
-                    Address = user.Address
+                    Address = user.Address,
+                    VerificationToken = VerficationGen(),
                 };
 
                 await _context.Users.AddAsync(userInfo);
 
                 var userOutput = await _context.SaveChangesAsync();
 
+                var vEmail = await _context.Users
+                .Where(r => r.Email == userInfo.Email).FirstAsync();
+
+                if (vEmail == null)
+                {
+                    users.status = false;
+                    users.data = "";
+                    users.message = "System Error";
+                }
+
+
+                verifyEmailDto.Email = vEmail.Email;
+                verifyEmailDto.Token = vEmail.VerificationToken;
 
                 Account newAccount = new Account
                 {
@@ -160,8 +194,17 @@ namespace P2PWallet.Services.Services
                 await _context.Accounts.AddAsync(newAccount);
 
                 var accountOutput = await _context.SaveChangesAsync();
+
+                if(verifyEmailDto.Token == null)
+                {
+                    users.message = "Registration Unsuccessful";
+                    users.status = false;
+                }
+
+                await _emailService.VerificationEmail(verifyEmailDto, verifyEmailDto.Token);
  
                 users.message = "Registration Successful, Please check your email to verify your account";
+                users.data = userInfo.VerificationToken;
                 users.status = true;
 
                 return users;
@@ -190,6 +233,13 @@ namespace P2PWallet.Services.Services
                     view.message = "Email or Username exist";
                     return view;
                 }
+
+                //if(data.VerifiedAt == null)
+                //{
+                //    view.status = false;
+                //    view.message = "You have not verified your account yet, please do so to Login on P2PWallet";
+                //    return view;
+                //}
 
                 if (!VerifyPasswordHash(user.Password, data.PasswordHash, data.PasswordSalt))
                 {
@@ -402,6 +452,30 @@ namespace P2PWallet.Services.Services
 
                 return users;
             }
+        }
+
+        public async Task<ActionResult<LoginView>> VerifyEmail(string uemail, string utoken)
+        {
+            LoginView view = new LoginView();
+
+            var checkData = await _context.Users.Where
+                (checkDetails => checkDetails.VerificationToken == utoken && checkDetails.Email == uemail).FirstAsync();
+
+            if (checkData == null)
+            {
+                view.status = false;
+                view.message = "Check Backend - Invalid";
+
+                return view;
+            }
+
+            //IsVerified
+            checkData.VerifiedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            view.status = true;
+            view.message = "Successfully Verified";
+            return view;
         }
     }
 }

@@ -31,4 +31,11 @@ namespace P2PWallet.Models.DataObjects
         public string TransferAmount { get; set; }
         public string CurrentBalance { get; set; }
     }
+
+
+    public class VerifyEmailDto
+    {
+        public string Email { get; set; }
+        public string Token { get; set; }
+    }
 }
