@@ -19,6 +19,9 @@ namespace P2PWallet.Services.Interfaces
         Task<UserView> CreatePin(PinDto pinDto);
         Task<UserView> VerifyPin(PinDto pinDto);
         Task<ActionResult<LoginView>> VerifyEmail(string uemail, string utoken);
+        Task<ActionResult<LoginView>> ForgotPassword(EmailDto email);
+        Task<ActionResult<LoginView>> ResetPassword(ResetPassword resetPassword);
+        //Task<object> GetProfile();
     }
 }
 

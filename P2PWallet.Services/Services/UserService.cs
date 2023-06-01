@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using P2PWallet.Models.DataObjects;
 using P2PWallet.Models.Entities;
 using P2PWallet.Services.Data;
@@ -21,6 +22,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Helpers;
 using static P2PWallet.Models.DataObjects.PaystackFundObject;
 using static P2PWallet.Models.DataObjects.UserObject;
 
@@ -234,12 +236,12 @@ namespace P2PWallet.Services.Services
                     return view;
                 }
 
-                //if(data.VerifiedAt == null)
-                //{
-                //    view.status = false;
-                //    view.message = "You have not verified your account yet, please do so to Login on P2PWallet";
-                //    return view;
-                //}
+                if (data.VerifiedAt == null)
+                {
+                    view.status = false;
+                    view.message = "You have not verified your account yet, please do so to Login on P2PWallet";
+                    return view;
+                }
 
                 if (!VerifyPasswordHash(user.Password, data.PasswordHash, data.PasswordSalt))
                 {
@@ -476,6 +478,118 @@ namespace P2PWallet.Services.Services
             view.status = true;
             view.message = "Successfully Verified";
             return view;
+        }
+
+        public async Task<ActionResult<LoginView>> ForgotPassword(EmailDto email)
+        {
+            LoginView view = new LoginView();
+            ForgotPasswordDto forgotPasswordDto = new ForgotPasswordDto();
+
+            var emailCheck = await _context.Users.Where(e => e.Email == email.Email).FirstAsync();
+
+            if(emailCheck == null)
+            {
+                view.status = false;
+                view.message = "Email not found";
+
+                return view;
+            }
+
+            emailCheck.PasswordResetToken = VerficationGen();
+            emailCheck.ResetTokenExpires = DateTime.Now.AddDays(1);
+            await _context.SaveChangesAsync();
+
+            forgotPasswordDto.Email = email.Email;
+            forgotPasswordDto.Token = emailCheck.PasswordResetToken;
+            forgotPasswordDto.Username =emailCheck.Username;
+
+            await _emailService.ForgotPasswordEmail(forgotPasswordDto);
+
+            view.status = true;
+            view.message = "email sent";
+
+            return view;
+        }
+
+        public async Task<ActionResult<LoginView>> ResetPassword(ResetPassword resetPassword)
+        {
+            LoginView view = new LoginView();
+
+            if (!resetPassword.Password.Equals(resetPassword.cPassword))
+            {
+                view.message = "Passwords do not match";
+                return view;
+            }
+
+            var checkData = await _context.Users.Where
+            (checkDetails => checkDetails.PasswordResetToken == resetPassword.Token && checkDetails.Email == resetPassword.Email).FirstAsync();
+
+            if (checkData == null || checkData.ResetTokenExpires < DateTime.Now)
+            {
+                view.status = false;
+                view.message = "Invalid Token";
+
+                return view;
+            }
+
+            CreatePasswordHash(resetPassword.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+
+            checkData.PasswordHash = passwordHash;
+            checkData.PasswordSalt = passwordSalt;
+            checkData.PasswordResetToken = null;
+            checkData.ResetTokenExpires = null;
+
+            await _context.SaveChangesAsync();
+
+            view.status = true;
+            view.message = "password changed";
+
+            return view;
+        }
+
+        public async Task<object> GetProfile()
+        {
+            UserView users = new UserView();
+
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new UserProfile();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+
+                var userData = await _context.Users
+                .Where(userInfo => userInfo.userId == userID)
+                .Select(userInfo => new UserProfile
+                {
+                    Username = userInfo.Username,
+                    Email = userInfo.Email,
+                    PhoneNumber = userInfo.PhoneNumber,
+                    Name = userInfo.firstName + " " + userInfo.lastName,
+                    Address = userInfo.Address
+                })
+                .FirstOrDefaultAsync();
+
+
+                if (userData == null) return new DashboardView();
+
+
+                return userData;
+            }
+            catch (Exception ex)
+            {
+                users.message = "Check Backend - Dashboard Display";
+                users.status = false;
+
+                _logger.LogError($"{users.message} \n {ex.Message}");
+
+                return users;
+            }
         }
     }
 }

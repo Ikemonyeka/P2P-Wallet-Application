@@ -85,6 +85,24 @@ namespace P2PWallet.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("ForgotPassword")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<LoginView>> ForgotPassword([FromBody] EmailDto email)
+        {
+            var result = await _userService.ForgotPassword(email);
+
+            return Ok(result);
+        }
+
+        [HttpPost("ResetPassword")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<LoginView>> ResetPassword(ResetPassword resetPassword)
+        {
+            var result = await _userService.ResetPassword(resetPassword);
+
+            return Ok(result);
+        }
     }
 }
 

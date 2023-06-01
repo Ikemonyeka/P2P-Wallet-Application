@@ -19,7 +19,7 @@ namespace P2PWallet.Models.Entities
         public DateTime? VerifiedAt { get; set; }
         public string? PasswordResetToken { get; set; }
         public DateTime? ResetTokenExpires { get; set; }
-        public string PhoneNumber { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty; 
         public string firstName { get; set; } = string.Empty;
         public string lastName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;

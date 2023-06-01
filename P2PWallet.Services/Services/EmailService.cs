@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic;
 using MimeKit;
 using MimeKit.Text;
+using Newtonsoft.Json;
 using P2PWallet.Models.DataObjects;
 using P2PWallet.Models.Entities;
 using P2PWallet.Services.Data;
@@ -16,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static P2PWallet.Models.DataObjects.PaystackFundObject;
 
 namespace P2PWallet.Services.Services
 {
@@ -35,14 +37,17 @@ namespace P2PWallet.Services.Services
         }
         public async Task creditEmail(ReceiverEmailDto receiverEmailDto)
         {
-            var CreditPathToFile = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString() + "Templates" +
-                 Path.DirectorySeparatorChar.ToString() + "EmailTemplate" + Path.DirectorySeparatorChar.ToString()
-                 + "ReceiverTransferEmailTemplate.html";
+            var Template = _configuration.GetSection("EmailDetails:CreditEmailTemplate").Value;
+
+            if (Template == null)
+            {
+
+            }
 
             //var userInfo = await _context.Users.Where(r => r.u).FirstAsync();
 
             string HtmlBody = "";
-            StreamReader reader = new StreamReader("C:\\Users\\ikemo\\source\\repos\\P2PWallet\\P2PWallet.Api\\wwwroot\\Templates\\EmailTemplate\\ReceiverTransferEmailTemplate.html");
+            StreamReader reader = new StreamReader(Template);
             HtmlBody = reader.ReadToEnd();
             HtmlBody = HtmlBody.Replace("{Username}", receiverEmailDto.CUsername);
             HtmlBody = HtmlBody.Replace("{TransactionDate}", receiverEmailDto.Date);
@@ -70,14 +75,17 @@ namespace P2PWallet.Services.Services
         {
 
 
-            var DebitPathToFile = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString() + "Templates" +
-            Path.DirectorySeparatorChar.ToString() + "EmailTemplate" + Path.DirectorySeparatorChar.ToString()
-            + "SenderTransferEmailTemplate.html";
+            var Template = _configuration.GetSection("EmailDetails:DebitEmailTemplate").Value;
+
+            if (Template == null)
+            {
+              
+            }
 
             //var userInfo = await 
 
             string HtmlBody = "";
-            StreamReader reader = new StreamReader("C:\\Users\\ikemo\\source\\repos\\P2PWallet\\P2PWallet.Api\\wwwroot\\Templates\\EmailTemplate\\SenderTransferEmailTemplate.html");
+            StreamReader reader = new StreamReader(Template);
             HtmlBody = reader.ReadToEnd();
             HtmlBody = HtmlBody.Replace("{Username}", senderEmailDto.DUsername);
             HtmlBody = HtmlBody.Replace("{TransactionDate}", senderEmailDto.Date);
@@ -106,10 +114,15 @@ namespace P2PWallet.Services.Services
             {
                 var Hosturl = _configuration.GetSection("EmailDetails:EmailLocalHost").Value;
                 var Curl = _configuration.GetSection("EmailDetails:EmailConfirmation").Value;
+                var Template = _configuration.GetSection("EmailDetails:VerificationEmailTemplate").Value;
 
+                if (Template == null)
+                {
+                    return false;
+                }
 
                 string HtmlBody = "";
-                StreamReader reader = new StreamReader("C:\\Users\\ikemo\\source\\repos\\P2PWallet\\P2PWallet.Api\\wwwroot\\Templates\\EmailTemplate\\EmailVerify.html");
+                StreamReader reader = new StreamReader(Template);
                 HtmlBody = reader.ReadToEnd();
                 HtmlBody = HtmlBody.Replace("{Link}", string.Format(Hosturl + Curl, verifyEmailDto.Email, verifyEmailDto.Token));
 
@@ -128,6 +141,46 @@ namespace P2PWallet.Services.Services
                 return true;
             }
             catch 
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ForgotPasswordEmail(ForgotPasswordDto forgotPasswordDto)
+        {
+
+            try
+            {
+                var Hosturl = _configuration.GetSection("EmailDetails:ForgoPasswordEmailHost").Value;
+                var Curl = _configuration.GetSection("EmailDetails:CForgotPassword").Value;
+                var Template = _configuration.GetSection("EmailDetails:ForgotPasswordEmail").Value;
+
+                if (Template == null)
+                {
+                    return false;
+                }
+
+                string HtmlBody = "";
+                StreamReader reader = new StreamReader(Template);
+                HtmlBody = reader.ReadToEnd();
+                HtmlBody = HtmlBody.Replace("{Username}", forgotPasswordDto.Username);
+                HtmlBody = HtmlBody.Replace("{Link}", string.Format(Hosturl + Curl, forgotPasswordDto.Token));
+
+                var email = new MimeMessage();
+                email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EmailDetails:DefaultEmail").Value));
+                email.To.Add(MailboxAddress.Parse(forgotPasswordDto.Email));
+                email.Subject = "Reset Password";
+                email.Body = new TextPart(TextFormat.Html) { Text = HtmlBody };
+
+                using var smtp = new SmtpClient();
+                smtp.Connect(_configuration.GetSection("EmailDetails:EmailHost").Value, 587, SecureSocketOptions.StartTls);
+                smtp.Authenticate(_configuration.GetSection("EmailDetails:EmailUsername").Value, _configuration.GetSection("EmailDetails:EmailPassword").Value);
+                smtp.Send(email);
+                smtp.Disconnect(true);
+
+                return true;
+            }
+            catch
             {
                 return false;
             }
