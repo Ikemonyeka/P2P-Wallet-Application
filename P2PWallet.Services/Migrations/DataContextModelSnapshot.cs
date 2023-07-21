@@ -88,6 +88,48 @@ namespace P2PWallet.Services.Migrations
                     b.ToTable("PaystackFunds");
                 });
 
+            modelBuilder.Entity("P2PWallet.Models.Entities.SecurityQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("SecurityA")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SecurityQ")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("userId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("userId")
+                        .IsUnique();
+
+                    b.ToTable("securityQuestions");
+                });
+
+            modelBuilder.Entity("P2PWallet.Models.Entities.SeedSecurityQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("SecurityQuestion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("seedSecurityQuestions");
+                });
+
             modelBuilder.Entity("P2PWallet.Models.Entities.Transfer", b =>
                 {
                     b.Property<int>("Id")
@@ -169,6 +211,9 @@ namespace P2PWallet.Services.Migrations
                     b.Property<byte[]>("PinSalt")
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<byte[]>("ProfilePhoto")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<DateTime?>("ResetTokenExpires")
                         .HasColumnType("datetime2");
 
@@ -217,6 +262,17 @@ namespace P2PWallet.Services.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("P2PWallet.Models.Entities.SecurityQuestion", b =>
+                {
+                    b.HasOne("P2PWallet.Models.Entities.User", "User")
+                        .WithOne("SecurityQuestions")
+                        .HasForeignKey("P2PWallet.Models.Entities.SecurityQuestion", "userId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("P2PWallet.Models.Entities.Transfer", b =>
                 {
                     b.HasOne("P2PWallet.Models.Entities.User", "BeneficiaryUser")
@@ -240,6 +296,9 @@ namespace P2PWallet.Services.Migrations
                         .IsRequired();
 
                     b.Navigation("PaystackFunds");
+
+                    b.Navigation("SecurityQuestions")
+                        .IsRequired();
 
                     b.Navigation("Transfers");
                 });

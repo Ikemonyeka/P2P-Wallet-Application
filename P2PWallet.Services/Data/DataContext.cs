@@ -19,5 +19,7 @@ namespace P2PWallet.Services.Data
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Transfer> Transfers { get; set; }
         public DbSet<PaystackFund> PaystackFunds { get; set;}
+        public DbSet<SecurityQuestion> securityQuestions { get; set; }
+        public DbSet<SeedSecurityQuestion> seedSecurityQuestions { get; set; }
     }
 }

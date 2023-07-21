@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using P2PWallet.Models.DataObjects;
 using P2PWallet.Models.Entities;
 using System;
@@ -21,7 +22,15 @@ namespace P2PWallet.Services.Interfaces
         Task<ActionResult<LoginView>> VerifyEmail(string uemail, string utoken);
         Task<ActionResult<LoginView>> ForgotPassword(EmailDto email);
         Task<ActionResult<LoginView>> ResetPassword(ResetPassword resetPassword);
-        //Task<object> GetProfile();
+        Task<object> GetProfile();
+        Task<object> UpdateProfile(UpdateUserProfile user);
+        Task<object> ProfilePhoto(IFormFile profilePhoto);
+        Task<ActionResult<UserView>> CheckSecurityExist();
+        Task<UserView> CreateSecurityQA(SecurityDto securityDto);
+        Task<UserView> VerifySecurityQA(SecurityAnswerDto securityDto);
+        Task<object> UpdatePin(PinDto pinDto);
+        Task<object> GetPhoto();
+        Task<object> GetQuestion();
     }
 }
 

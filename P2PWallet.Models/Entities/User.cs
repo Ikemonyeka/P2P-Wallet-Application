@@ -23,7 +23,9 @@ namespace P2PWallet.Models.Entities
         public string firstName { get; set; } = string.Empty;
         public string lastName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
+        public byte[]? ProfilePhoto { get; set; }
         public virtual Account Account { get; set; }
+        public virtual SecurityQuestion SecurityQuestions { get; set; }
         public virtual List<Transfer> Transfers { get; set; }
         public virtual List<PaystackFund> PaystackFunds { get; set;}
     }

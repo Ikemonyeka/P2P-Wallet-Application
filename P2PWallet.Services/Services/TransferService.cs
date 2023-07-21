@@ -8,6 +8,7 @@ using P2PWallet.Models.Entities;
 using P2PWallet.Services.Data;
 using P2PWallet.Services.Interfaces;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -345,7 +346,11 @@ namespace P2PWallet.Services.Services
                     return view;
                 }
 
-                return userData;
+                view.data = userData.ReceiverName ;
+                view.status = true;
+                view.message = "valid account number";
+
+                return view;
             }
             catch (Exception ex)
             {
@@ -355,6 +360,67 @@ namespace P2PWallet.Services.Services
                 _logger.LogError($"{view.message} \n {ex.Message}");
 
                 return view;
+            }
+        }
+
+        public async Task<List<TransferView>> GetTransferHistoryByDate(PdfDto pdfDto)
+        {
+            TransferView view = new TransferView();
+
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new List<TransferView>();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+                var transferData = await _context.Transfers
+                .Where(transferInfo => transferInfo.DebitUserId == userID || transferInfo.BeneficiaryUserId == userID).Where(x => x.Date >= pdfDto.StartDate && x.Date <= pdfDto.EndDate)
+                .Select(transferInfo => new TransferView
+                {
+                    Date = transferInfo.Date.ToString("MM/dd/yyyy"),
+                    BeneficiaryAccountNo = transferInfo.BeneficiaryAccountNo,
+                    DUsername = transferInfo.DebitUser.firstName + " " + transferInfo.DebitUser.lastName,
+                    CUsername = transferInfo.BeneficiaryUser.firstName + " " + transferInfo.BeneficiaryUser.lastName,
+                    Amount = transferInfo.Amount,
+                    Status = transferInfo.Status,
+                    DebitUserId = transferInfo.DebitUserId,
+                    BeneficiaryUserId = transferInfo.BeneficiaryUserId
+                })
+                .ToListAsync();
+
+                foreach (var transferInfos in transferData)
+                {
+                    if (transferInfos.DebitUserId == null && transferInfos.BeneficiaryUserId == userID)
+                    {
+                        transferInfos.TransactionType = "C";
+                        transferInfos.DUsername = "Paystack Funding";
+                    }
+                    if (transferInfos.DebitUserId == userID)
+                    {
+                        transferInfos.TransactionType = "D";
+                    }
+                    else
+                    {
+                        transferInfos.TransactionType = "C";
+                    }
+                }
+
+                if (transferData == null)
+                {
+                    return new List<TransferView>();
+                }
+
+                return transferData;
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError($"Check Backend - Transfer History \n {ex.Message}");
+                return new List<TransferView>();
             }
         }
     }

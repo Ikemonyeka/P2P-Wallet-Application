@@ -15,10 +15,15 @@ namespace P2PWallet.Api.Controllers
     {
         private readonly DataContext _context;
         private ITransferService _transferService;
-        public TransferController(DataContext context, ITransferService transferService)
+        private readonly IPdfServices _pdfServices;
+        private readonly IExcelService _excelService;
+
+        public TransferController(DataContext context, ITransferService transferService, IPdfServices pdfServices, IExcelService excelService)
         {
             _context = context;
             _transferService = transferService;
+            _pdfServices = pdfServices;
+            _excelService = excelService;
         }
 
         [HttpPost("Transaction")]
@@ -48,13 +53,46 @@ namespace P2PWallet.Api.Controllers
             return Ok(transferHistory);
         }
 
-        [HttpPost]
+        [HttpPost("VerifyBeneficiary")]
         [ProducesResponseType(200), Authorize]
         public async Task<ActionResult<object>> TransactionVerify(string transfer)
         {
             var result = await _transferService.TransactionVerify(transfer);
 
             return Ok(result);
+        }
+
+        [HttpPost("PdfGenerator")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<IActionResult> GetPdf(PdfDto pdfDto)
+        {
+            var result = await _pdfServices.GetPdf(pdfDto);
+
+            return File(result.ToArray(), "application/pdf", "AccStat");
+           // var result2 = await _pdfServices.PdfGenerator(result);
+
+            //return result;
+        }
+
+        [HttpPost("TransferHistoryByDate")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<ActionResult<TransferView>> GetTransferHistoryByDate(PdfDto pdfDto)
+        {
+            var transferHistory = await _transferService.GetTransferHistoryByDate(pdfDto);
+
+            return Ok(transferHistory);
+        }
+
+        [HttpPost("ExcelGenerator")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<IActionResult> GetExcel(PdfDto pdfDto)
+        {
+            var result = await _excelService.GetExcel(pdfDto);
+
+            return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AccStat.xlsx");
+            // var result2 = await _pdfServices.PdfGenerator(result);
+
+            //return result;
         }
     }
 }

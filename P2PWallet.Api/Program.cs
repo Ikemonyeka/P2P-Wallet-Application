@@ -10,10 +10,15 @@ using Swashbuckle.AspNetCore.Filters;
 using NLog;
 using NLog.Web;
 using System.Text;
+using DinkToPdf.Contracts;
+using DinkToPdf;
+using Microsoft.Extensions.FileProviders;
+using ServiceStack.Text;
 
 namespace P2PWallet.Api
 {
     public class Program
+
     {
         public static void Main(string[] args)
         {
@@ -62,6 +67,10 @@ namespace P2PWallet.Api
                 builder.Services.AddScoped<IEmailService, EmailService>();
                 builder.Services.AddScoped<ITransferService, TransferService>();
                 builder.Services.AddScoped<IPaystackFundService, PaystackFundService>();
+                builder.Services.AddScoped<ISeedSecurityQuestion, SeedSecurityQService>();
+                builder.Services.AddScoped<IPdfServices, PdfService>();
+                builder.Services.AddScoped<IExcelService, ExcelService>();
+                builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
                 builder.Services.AddHttpContextAccessor();
 
@@ -100,6 +109,8 @@ namespace P2PWallet.Api
 
 
                 app.MapControllers();
+
+                app.SeedSecurityQs();
 
                 app.Run();
             }

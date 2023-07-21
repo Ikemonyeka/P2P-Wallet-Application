@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static P2PWallet.Models.DataObjects.PaystackFundObject;
+using static P2PWallet.Models.DataObjects.UserObject;
 
 namespace P2PWallet.Services.Services
 {
@@ -184,6 +185,43 @@ namespace P2PWallet.Services.Services
             {
                 return false;
             }
+        }
+
+        public async Task AccountStatement(string userEmail, string username, PdfDate pdfDate, string fileName)
+        {
+            var Template = _configuration.GetSection("PdfTemplates:PdfEmailTemplate").Value;
+
+            if (Template == null)
+            {
+                
+            }
+
+            //var userInfo = await _context.Users.Where(r => r.u).FirstAsync();
+
+            string HtmlBody = "";
+            StreamReader reader = new StreamReader(Template);
+            HtmlBody = reader.ReadToEnd();
+            HtmlBody = HtmlBody.Replace("{Username}", username);
+            HtmlBody = HtmlBody.Replace("{date}", $"{pdfDate.StartDate.ToString("MM/dd/yyyy")} - {pdfDate.EndDate.ToString("MM/dd/yyyy")}");
+
+
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EmailDetails:DefaultEmail").Value));
+            email.To.Add(MailboxAddress.Parse(userEmail));
+            email.Subject = $"STATEMENT OF ACCOUNT {DateTime.Now.ToString("MM/dd/yyyy")}";
+
+
+            BodyBuilder bodyBuilder = new BodyBuilder();
+            bodyBuilder.HtmlBody = HtmlBody;
+            bodyBuilder.Attachments.Add(fileName);
+            email.Body = bodyBuilder.ToMessageBody();
+
+
+            using var smtp = new SmtpClient();
+            smtp.Connect(_configuration.GetSection("EmailDetails:EmailHost").Value, 2525, SecureSocketOptions.StartTls);
+            smtp.Authenticate(_configuration.GetSection("EmailDetails:EmailUsername").Value, _configuration.GetSection("EmailDetails:EmailPassword").Value);
+            smtp.Send(email);
+            smtp.Disconnect(true);
         }
     }
 }

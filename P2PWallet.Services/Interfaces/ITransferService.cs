@@ -16,6 +16,6 @@ namespace P2PWallet.Services.Interfaces
         Task<ActionResult<object>> TransactionVerify(string transfer);
         Task<object> GetDebitUser();
         Task<List<TransferView>> GetTransferHistory();
-
+        Task<List<TransferView>> GetTransferHistoryByDate(PdfDto pdfDto);
     }
 }

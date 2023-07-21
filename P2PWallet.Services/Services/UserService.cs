@@ -197,10 +197,22 @@ namespace P2PWallet.Services.Services
 
                 var accountOutput = await _context.SaveChangesAsync();
 
+                SecurityQuestion securityQuestion = new SecurityQuestion
+                {
+                    userId = userInfo.userId
+                };
+
+                await _context.securityQuestions.AddAsync(securityQuestion);
+
+                await _context.SaveChangesAsync();
+
+
                 if(verifyEmailDto.Token == null)
                 {
                     users.message = "Registration Unsuccessful";
                     users.status = false;
+
+                    return users;
                 }
 
                 await _emailService.VerificationEmail(verifyEmailDto, verifyEmailDto.Token);
@@ -228,11 +240,11 @@ namespace P2PWallet.Services.Services
             LoginView view = new LoginView();
             try
             {
-                var data = await _context.Users.Where(userCheck => userCheck.Username == user.Username).FirstAsync();
+                var data = await _context.Users.Where(userCheck => userCheck.Username == user.Username).FirstOrDefaultAsync();
                 if (data == null)
                 {
                     view.status = false;
-                    view.message = "Email or Username exist";
+                    view.message = "Incorrect Username or Password";
                     return view;
                 }
 
@@ -570,13 +582,14 @@ namespace P2PWallet.Services.Services
                     Username = userInfo.Username,
                     Email = userInfo.Email,
                     PhoneNumber = userInfo.PhoneNumber,
-                    Name = userInfo.firstName + " " + userInfo.lastName,
+                    Firstname = userInfo.firstName,
+                    Lastname = userInfo.lastName,
                     Address = userInfo.Address
                 })
                 .FirstOrDefaultAsync();
 
 
-                if (userData == null) return new DashboardView();
+                if (userData == null) return new UserProfile();
 
 
                 return userData;
@@ -584,6 +597,363 @@ namespace P2PWallet.Services.Services
             catch (Exception ex)
             {
                 users.message = "Check Backend - Dashboard Display";
+                users.status = false;
+
+                _logger.LogError($"{users.message} \n {ex.Message}");
+
+                return users;
+            }
+        }
+
+        public async Task<object> UpdateProfile(UpdateUserProfile user)
+        {
+            UserView users = new UserView();
+
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new DashboardView();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+                var userData = await _context.Users
+                .Where(userInfo => userInfo.userId == userID).FirstAsync();
+
+
+                //var data = await _context.Users.AnyAsync(userCheck => userCheck.Username == user.Username);
+                //if (data)
+                //{
+                //    users.message = "Username exist";
+                //    return users;
+                //}
+
+                if(user.Firstname == "")
+                {
+                    user.Firstname = userData.firstName;
+                }
+
+                if (user.Lastname == "")
+                {
+                    user.Lastname = userData.lastName;
+                }
+
+                if (user.PhoneNumber == "")
+                {
+                    user.PhoneNumber = userData.PhoneNumber;
+                }
+
+                if (user.Address == "")
+                {
+                    user.Address = userData.Address;
+                }
+
+                userData.firstName = user.Firstname;
+                userData.lastName = user.Lastname;
+                userData.Username = userData.Username;
+                userData.Email = userData.Email;
+                userData.PhoneNumber = user.PhoneNumber;
+                userData.Address = user.Address;
+
+                await _context.SaveChangesAsync();
+
+                users.status = true;
+                users.message = "Updated Succesfully";
+                return users;
+
+            }
+            catch (Exception ex) 
+            {
+                return new UserProfile();
+            }
+        }
+
+        public async Task<object> ProfilePhoto(IFormFile profilePhoto)
+        {
+            UserView users = new UserView();
+
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new DashboardView();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+                var userData = await _context.Users
+                .Where(userInfo => userInfo.userId == userID).FirstAsync();
+
+                if(userData == null)
+                {
+                    users.status = false;
+                    users.message = "Did not update profile";
+                    return users;
+                }
+
+                using (var stream = new MemoryStream())
+                {
+                    profilePhoto.CopyTo(stream);
+                    userData.ProfilePhoto = stream.ToArray();
+                }
+
+                await _context.SaveChangesAsync();
+
+                users.status = true;
+                users.message = "Updated Profile Succesfully";
+                return users;
+
+            }
+            catch (Exception ex)
+            {
+                return new UserProfile();
+            }
+        }
+
+        public async Task<ActionResult<UserView>> CheckSecurityExist()
+        {
+            UserView users = new UserView();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    users.status = false;
+                    return users;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+                var userData = await _context.securityQuestions
+                .Where(securityCheck => securityCheck.userId == userID).FirstAsync();
+
+
+                if (userData.SecurityQ == null || userData.SecurityA == null)
+                {
+                    users.status = false;
+                    users.message = "Please select a security question and answer";
+                    return users;
+                }
+
+                users.message = "QA Exists";
+                users.status = true;
+
+                return users;
+            }
+            catch (Exception ex)
+            {
+                users.message = "Check Backend - Check Security";
+                users.status = false;
+
+                _logger.LogError($"{users.message} \n {ex.Message}");
+
+                return users;
+            }
+        }
+
+        public async Task<UserView> CreateSecurityQA(SecurityDto securityDto)
+        {
+            UserView users = new UserView();
+
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return null;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+                var userData = await _context.Users
+                .Where(qa => qa.userId == userID).FirstAsync();
+
+                userData.SecurityQuestions.SecurityQ = securityDto.SecurityQ;
+                userData.SecurityQuestions.SecurityA = securityDto.SecurityA;
+
+                await _context.SaveChangesAsync();
+
+                users.status = true;
+                users.message = "SQ & SA Saved Successfully";
+                return users;
+            }
+            catch (Exception ex)
+            {
+                users.message = "Check Backend - Create SQ & SA Unsuccessful";
+                users.status = false;
+
+                _logger.LogError($"{users.message} \n {ex.Message}");
+
+                return users;
+            }
+        }
+
+        public async Task<UserView> VerifySecurityQA(SecurityAnswerDto securityDto)
+        {
+            UserView users = new UserView();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return null;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+                var userData = await _context.securityQuestions
+                .Where(pinInfo => pinInfo.userId == userID).FirstAsync();
+
+                if (userData.SecurityA != securityDto.SecurityA)
+                {
+                    users.status = false;
+                    users.message = "Incorrect Answer, Try Again";
+                    return users;
+                }
+
+                users.status = true;
+                users.message = "Correct Answer";
+                return users;
+            }
+            catch (Exception ex)
+            {
+                users.message = "Check Backend - Verify Security Answer Unsuccessful";
+                users.status = false;
+
+                _logger.LogError($"{users.message} \n {ex.Message}");
+
+                return users;
+            }
+        }
+
+        public async Task<object> UpdatePin(PinDto pinDto)
+        {
+            UserView users = new UserView();
+
+            CreatePinHash(pinDto.Pin, out byte[] pinHash, out byte[] pinSalt);
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return null;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+                var userData = await _context.Users
+                .Where(pinInfo => pinInfo.userId == userID).FirstAsync();
+
+                if (pinDto.Pin.Length != 4)
+                {
+                    users.status = false;
+                    users.message = "Your pin must be 4 digits";
+                    return users;
+                }
+
+                userData.PinHash = pinHash;
+                userData.PinSalt = pinSalt;
+
+                await _context.SaveChangesAsync();
+
+                users.status = true;
+                users.message = "pin updated";
+                return users;
+            }
+            catch (Exception ex)
+            {
+                users.message = "Check Backend - Create Pin Unsuccessful";
+                users.status = false;
+
+                _logger.LogError($"{users.message} \n {ex.Message}");
+
+                return users;
+            }
+        }
+
+        public async Task<object> GetPhoto()
+        {
+            ImageDto users = new ImageDto();
+
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    users.status = false;
+                    users.message = "image byte";
+
+                    return users;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+                var userData = await _context.Users
+                .Where(userInfo => userInfo.userId == userID).FirstAsync();
+
+
+                if (userData.ProfilePhoto == null)
+                {
+                    users.status = false;
+                    users.message = "No Image found";
+
+                    return users;
+                }
+
+
+                users.status = true;
+                users.message = "image byte";
+                users.data = userData.ProfilePhoto;
+
+                return users;
+            }
+            catch (Exception ex)
+            {
+                users.message = "Check Backend - Image Display";
+                users.status = false;
+
+                _logger.LogError($"{users.message} \n {ex.Message}");
+
+                return users;
+            }
+        }
+
+        public async Task<object> GetQuestion()
+        {
+            UserView users = new UserView();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new DashboardView();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+
+                var userData = await _context.securityQuestions
+                .Where(userInfo => userInfo.userId == userID)
+                .Select(userInfo => new SecurityQuestionDto
+                {
+                    SecurityQ = userInfo.SecurityQ
+                })
+                .FirstOrDefaultAsync();
+
+
+                if (userData == null) return new SecurityAnswerDto();
+
+                users.status = true;
+                users.message = userData.SecurityQ;
+
+                return users;
+            }
+            catch (Exception ex)
+            {
+                users.message = "Check Backend - Security Answer Display";
                 users.status = false;
 
                 _logger.LogError($"{users.message} \n {ex.Message}");

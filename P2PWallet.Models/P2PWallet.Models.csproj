@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.Authentication.Plugin" Version="1.0.1" />
+    <PackageReference Include="DinkToPdf" Version="1.0.8" />
     <PackageReference Include="MailKit" Version="4.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
       <PrivateAssets>all</PrivateAssets>
@@ -25,6 +26,7 @@
 	<ItemGroup>
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.*" />
 		<PackageReference Include="NLog" Version="5.*" />
+		<PackageReference Include="NPOI" Version="2.6.1" />
 	</ItemGroup>
 
 </Project>

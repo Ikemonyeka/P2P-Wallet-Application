@@ -13,5 +13,6 @@ namespace P2PWallet.Services.Interfaces
         Task debitEmail(SenderEmailDto senderEmailDto);
         Task<bool> VerificationEmail(VerifyEmailDto verifyEmailDto, string token);
         Task<bool> ForgotPasswordEmail(ForgotPasswordDto forgotPasswordDto);
+        Task AccountStatement(string userEmail, string username, PdfDate pdfDate, string fileName);
     }
 }

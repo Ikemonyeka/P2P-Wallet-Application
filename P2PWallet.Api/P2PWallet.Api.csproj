@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\Templates\EmailTemplate\EmailVerify.html" />
+    <_ContentIncludedByDefault Remove="wwwroot\Templates\PdfTemplate\PdfStatement.html" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.Authentication.Plugin" Version="1.0.1" />
+    <PackageReference Include="DinkToPdf" Version="1.0.8" />
     <PackageReference Include="MailKit" Version="4.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
@@ -26,6 +28,8 @@
     <PackageReference Include="NLog" Version="5.1.4" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.2.3" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.3" />
+    <PackageReference Include="NPOI" Version="2.6.1" />
+    <PackageReference Include="ServiceStack.Text" Version="6.9.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
   </ItemGroup>
@@ -38,5 +42,17 @@
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.*" />
 		<PackageReference Include="NLog" Version="5.*" />
 	</ItemGroup>
+
+    <ItemGroup>
+      <None Update="libwkhtmltox.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="libwkhtmltox.dylib">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="libwkhtmltox.so">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 
 </Project>
