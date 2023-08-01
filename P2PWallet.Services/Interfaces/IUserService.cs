@@ -31,6 +31,9 @@ namespace P2PWallet.Services.Interfaces
         Task<object> UpdatePin(PinDto pinDto);
         Task<object> GetPhoto();
         Task<object> GetQuestion();
+        Task<object> CreateAvailabeCurrency();
+        Task<UserView> CreateNewWallet(string currency);
+        Task<object> GetConversion();
     }
 }
 

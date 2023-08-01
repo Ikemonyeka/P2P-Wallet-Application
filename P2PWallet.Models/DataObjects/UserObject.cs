@@ -95,5 +95,29 @@ namespace P2PWallet.Models.DataObjects
         {
             public string SecurityQ { get; set; }
         }
+
+        public class CreateNewWallet
+        {
+            public string Currency { get; set; }
+        }
+
+        public class UCreateNewWallet
+        {
+            public string Currency { get; set; }
+        }
+
+        public class DCreateNewWallet
+        {
+            public string Currency { get; set; }
+        }
+
+        public class AvailableCurrency
+        {
+            public string Currency { get; set; }
+            public string Username { get; set; }
+            public string AccountNo { get; set; }
+            public decimal Balance { get; set; }
+            public bool Fund { get; set; }
+        }
     }
 }

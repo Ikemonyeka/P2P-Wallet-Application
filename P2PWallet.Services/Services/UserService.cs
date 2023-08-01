@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
+using NPOI.SS.Formula.Functions;
 using P2PWallet.Models.DataObjects;
 using P2PWallet.Models.Entities;
 using P2PWallet.Services.Data;
@@ -20,6 +21,7 @@ using System.Net.NetworkInformation;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Xml;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Helpers;
@@ -299,16 +301,30 @@ namespace P2PWallet.Services.Services
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
 
 
-                var userData = await _context.Users
+                var userData = await _context.Accounts
                 .Where(userInfo => userInfo.userId == userID)
-                .Select(userInfo => new DashboardView
+                .Select(userInfo => new AvailableCurrency
                 {
-                    Username = userInfo.Username,
-                    AccountNo = userInfo.Account.AccountNo,
-                    Balance = userInfo.Account.Balance,
-                    Currency = userInfo.Account.Currency
+                    Username = userInfo.User.Username,
+                    AccountNo = userInfo.AccountNo,
+                    Balance = userInfo.Balance,
+                    Currency = userInfo.Currency
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
+
+
+                foreach (var x in userData)
+                {
+                    if(x.Currency == "NGN")
+                    {
+                        x.Fund = false;
+                    }
+                    else
+                    {
+                        x.Fund = true;
+                    }
+                }
+
 
 
                 if (userData == null) return new DashboardView();
@@ -960,6 +976,143 @@ namespace P2PWallet.Services.Services
 
                 return users;
             }
+        }
+
+        public async Task<object> CreateAvailabeCurrency()
+        {
+            List<CreateNewWallet> wallet = new List<CreateNewWallet>();
+            List<UCreateNewWallet> userWallet = new List<UCreateNewWallet>();
+            List<string> AvailableCurrency = new List<string>();
+
+            int userID;
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                return null;
+            }
+
+            userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+            var currency = await _context.currencies.ToListAsync();
+            var userCurrency = await _context.Accounts.Where(x => x.userId == 1).ToListAsync();
+            var test = await _context.currencies.ToListAsync();
+
+            //currency.ForEach(w => wallet.Add(new CreateNewWallet
+            //{
+            //    Currency = w.Currency,
+            //}));
+
+            //userCurrency.ForEach(w => userWallet.Add(new UCreateNewWallet
+            //{
+            //    Currency = w.Currency,
+            //}));            
+
+            /*    foreach(var c in currency)
+                {
+                    if(userCurrency.Any(x => x.Currency != c.Currency))
+                    {
+                        AvailableCurrency.Add(c.Currency);
+                    }
+
+                }
+
+                return AvailableCurrency;*/
+
+         
+
+            foreach (var c in currency)
+            {
+                if (userCurrency.Any(x => x.Currency == c.Currency))
+                {
+                 test.Remove(c);
+                }
+              /* foreach(var cur in AvailableCurrency)
+                {
+                    test.RemoveAll(x=> x.Currency !="boom");
+                 var Curre =  await _context.currencies.Where(x => x.Currency == cur).FirstOrDefaultAsync();
+                    test.Add(Curre);
+                }*/
+                //test = AvailableCurrency;
+
+            }
+
+            return test; 
+
+
+            //foreach(var c in currency)
+            //{
+            //    foreach ( var e in userCurrency)
+            //    {
+            //        if (e.Currency.Contains(c.Currency))
+            //        {
+
+            //        }
+            //    }
+            //}
+        }
+
+        public async Task<UserView> CreateNewWallet(string currency)
+        {
+            UserView view = new UserView();
+            int userID;
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                return null;
+            }
+
+            userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+            var x = await _context.Accounts.Where(x => x.userId == userID && x.Currency == currency).FirstOrDefaultAsync();
+            if(x != null)
+            {
+                view.status = false;
+                view.message = "This account aleardy exists";
+                return view;
+            }
+            
+            var data = await _context.Accounts.Where(x => x.userId == userID && x.Currency == "NGN").FirstOrDefaultAsync();
+            var c = await _context.currencies.Where(x => x.Currency == currency).FirstOrDefaultAsync();
+            if(data.Balance < c.chargeRate)
+            {
+                view.status = false;
+                view.message = "Insufficient funds to create this account";
+                return view;
+            }
+            
+            var myTransaction = _context.Database.BeginTransaction();
+
+            try
+            {
+                data.Balance = data.Balance - c.chargeRate;
+
+                Account account = new Account
+                {
+                    AccountNo = AccountGen(),
+                    Balance = 0,
+                    Currency = currency,
+                    userId = userID
+                };
+
+                await _context.Accounts.AddAsync(account);
+                await _context.SaveChangesAsync();
+                await myTransaction.CommitAsync();
+
+            }
+            catch (Exception ex)
+            {
+                await  myTransaction.RollbackAsync();
+            }
+
+
+            view.status = true;
+            view.message = $"{currency} account created successfully";
+            return view;
+        }
+
+        public async Task<object> GetConversion()
+        {
+            var x = await _context.currencies.ToListAsync();
+
+            return x;
         }
     }
 }

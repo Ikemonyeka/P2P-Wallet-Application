@@ -14,6 +14,8 @@ using DinkToPdf.Contracts;
 using DinkToPdf;
 using Microsoft.Extensions.FileProviders;
 using ServiceStack.Text;
+using P2PWallet.Services;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace P2PWallet.Api
 {
@@ -32,6 +34,10 @@ namespace P2PWallet.Api
                 // Add services to the container.
 
                 builder.Services.AddControllers();
+
+                //add signalr
+                builder.Services.AddSignalR();
+
                 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
                 builder.Services.AddEndpointsApiExplorer();
                 builder.Services.AddSwaggerGen(options =>
@@ -79,7 +85,21 @@ namespace P2PWallet.Api
                 builder.Host.UseNLog();
 
 
+                builder.Services.AddCors((options) =>
+                {
+                    options.AddPolicy("NotificationClientApp",
+                        new CorsPolicyBuilder()
+                        .WithOrigins("http://127.0.0.1:5500")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .SetIsOriginAllowed(origin => true)
+                        .AllowCredentials()
+                        .Build());
+                });
+
                 var app = builder.Build();
+
+                app.UseCors("NotificationClientApp");
 
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
@@ -89,6 +109,9 @@ namespace P2PWallet.Api
                 }
 
                 app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
+
+               
 
                 // Configure the HTTP request pipeline.
                 if (!app.Environment.IsDevelopment())
@@ -109,6 +132,13 @@ namespace P2PWallet.Api
 
 
                 app.MapControllers();
+
+                app.currencySeed();
+
+                app.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapHub<SignalHub>("/alert");
+                });
 
                 app.SeedSecurityQs();
 

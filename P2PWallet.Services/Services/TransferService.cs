@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
+using NPOI.SS.Formula.Functions;
 using P2PWallet.Models.DataObjects;
 using P2PWallet.Models.Entities;
 using P2PWallet.Services.Data;
@@ -101,10 +102,6 @@ namespace P2PWallet.Services.Services
                     }   
                 }
 
-
-
-
-
                 if (transferData == null)
                 {
                     return new List<TransferView>();
@@ -134,15 +131,15 @@ namespace P2PWallet.Services.Services
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
 
 
-                var userData = await _context.Users
+                var userData = await _context.Accounts
                 .Where(userInfo => userInfo.userId == userID)
                 .Select(userInfo => new DashboardView
                 {
-                    AccountNo = userInfo.Account.AccountNo,
-                    Balance = userInfo.Account.Balance,
-                    Currency = userInfo.Account.Currency
+                    AccountNo = userInfo.AccountNo,
+                    Balance = userInfo.Balance,
+                    Currency = userInfo.Currency
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
 
                 if (userData == null) return new DashboardDto();
@@ -192,8 +189,8 @@ namespace P2PWallet.Services.Services
                     return transfers;
                 }
 
-                var receivEmail = await _context.Users
-                .Where(r => r.Account.AccountNo == transfer.BeneficiaryAccountNo).FirstAsync();
+                var receivEmail = await _context.Accounts
+                .Where(r => r.AccountNo == transfer.BeneficiaryAccountNo).FirstAsync();
 
                 var failedDTransfer = data.Balance;
                 var failedCTransfer = data2.Balance;
@@ -244,14 +241,14 @@ namespace P2PWallet.Services.Services
                 senderEmailDto.DUsername = sendEmail.Username;
                 senderEmailDto.Date = emailDate;
                 senderEmailDto.Reference = newTransfer.Reference;
-                senderEmailDto.CreditName = receivEmail.firstName + " " + receivEmail.lastName;
+                senderEmailDto.CreditName = receivEmail.User.firstName + " " + receivEmail.User.lastName;
                 senderEmailDto.TransferAmount = newTransfer.Amount.ToString();
                 senderEmailDto.CurrentBalance = data.Balance.ToString();
 
 
-                receiverEmailDto.receiverEmail = receivEmail.Email;
+                receiverEmailDto.receiverEmail = receivEmail.User.Email;
                 receiverEmailDto.Subject = newTransfer.Amount.ToString();
-                receiverEmailDto.CUsername = receivEmail.Username;
+                receiverEmailDto.CUsername = receivEmail.User.Username;
                 receiverEmailDto.Date = emailDate;
                 receiverEmailDto.Reference = newTransfer.Reference;
                 receiverEmailDto.DebitName = sendEmail.firstName + " " + sendEmail.lastName;
@@ -319,11 +316,11 @@ namespace P2PWallet.Services.Services
                     BeneficiaryAccountNo = transfer
                 };
 
-                var userData = await _context.Users
-                   .Where(userInfo => userInfo.Account.AccountNo == transfer)
+                var userData = await _context.Accounts
+                   .Where(userInfo => userInfo.AccountNo == transfer)
                        .Select(userInfo => new RecieverDetails
                        {
-                           ReceiverName = userInfo.firstName + " " + userInfo.lastName,
+                           ReceiverName = userInfo.User.firstName + " " + userInfo.User.lastName,
                            ReceiverAccountNo = transfer
                        })  
                    .FirstOrDefaultAsync();
@@ -422,6 +419,97 @@ namespace P2PWallet.Services.Services
                 _logger.LogError($"Check Backend - Transfer History \n {ex.Message}");
                 return new List<TransferView>();
             }
+        }
+
+        public async Task<UserView> FundForeignCurrrency(TransferSDto transfer)
+        {
+            UserView view = new UserView();
+            int userID;
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                return new UserView();
+            }
+
+            userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+            var creditUser = await _context.Accounts.Where(x => x.userId == userID).Where(x => x.AccountNo == transfer.AccountNo).FirstOrDefaultAsync();
+
+            var debitUser = await _context.Accounts.Where(x => x.userId == userID).Where(x => x.Currency == "NGN").FirstOrDefaultAsync();
+
+            var cur = await _context.currencies.Where(x => x.Currency ==creditUser.Currency).FirstAsync();
+
+            if(creditUser == debitUser)
+            {
+                view.status = false;
+                view.message = "Cannot transfer to yourself";
+
+                return view;
+            }
+
+            if (creditUser == null)
+            {
+                view.status = false;
+                view.message = "This account number cannot be found";
+
+                return view;
+            }
+            if (debitUser == null)
+            {
+                view.status = false;
+                view.message = "This account number cannot be found";
+
+                return view;
+            }
+            if (transfer.Amount <= 0)
+            {
+                view.status = false;
+                view.message = "Cannot transfer zero or a negative value";
+
+                return view;
+            }
+
+            var calc = (cur.conversionRate * transfer.Amount);
+            if (debitUser.Balance< calc) {
+                view.status = false;
+                view.message = "You have insufficient funds, please fund your NGN and try again";
+
+                return view;
+
+            }
+
+            var myTransaction = _context.Database.BeginTransaction();
+
+            try
+            {
+                creditUser.Balance = transfer.Amount + creditUser.Balance;
+
+                debitUser.Balance = debitUser.Balance - calc;
+
+                Transfer newTransfer = new Transfer
+                {
+                    DebitAccountNo = debitUser.AccountNo,
+                    BeneficiaryAccountNo = creditUser.AccountNo,
+                    Amount = transfer.Amount,
+                    Reference = ReferenceGen(),
+                    Status = "Successful",
+                    Date = DateTime.UtcNow,
+                    DebitUserId = userID,
+                    BeneficiaryUserId = creditUser.userId
+                };
+
+                await _context.Transfers.AddAsync(newTransfer);
+                var userOutput = await _context.SaveChangesAsync();
+                myTransaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                await myTransaction.RollbackAsync();
+            }
+
+            view.status = true;
+            view.message = "Transfer Successful";
+
+            return view;
         }
     }
 }

@@ -4,6 +4,7 @@ using P2PWallet.Models.DataObjects;
 using P2PWallet.Models.Entities;
 using P2PWallet.Services.Data;
 using P2PWallet.Services.Interfaces;
+using P2PWallet.Services.Migrations;
 using static P2PWallet.Models.DataObjects.UserObject;
 
 namespace P2PWallet.Api.Controllers
@@ -184,6 +185,33 @@ namespace P2PWallet.Api.Controllers
             var question = await _userService.GetQuestion();
 
             return Ok(question);
+        }
+
+        [HttpGet("AvailableWallet")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<ActionResult<List<DCreateNewWallet>>> GetAvailableWallets()
+        {
+            var sq = await _userService.CreateAvailabeCurrency();
+
+            return Ok(sq);
+        }
+
+        [HttpPost("CreateNewWallet")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<ActionResult<UserView>> CreateNewWallet(string currency)
+        {
+            var result = await _userService.CreateNewWallet(currency);
+
+            return Ok(result);
+        }
+
+        [HttpGet("Currencies")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<object> GetConversion()
+        {
+            var result = await _userService.GetConversion();
+
+            return Ok(result);
         }
     }
 }

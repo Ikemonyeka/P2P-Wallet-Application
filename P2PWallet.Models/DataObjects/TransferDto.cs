@@ -33,4 +33,10 @@ namespace P2PWallet.Models.DataObjects
         public string ReceiverName { get; set; }
         public string ReceiverAccountNo { get; set; }
     }
+
+    public class TransferSDto
+    {
+        public string AccountNo { get; set; }
+        public decimal Amount { get; set; }
+    }
 }

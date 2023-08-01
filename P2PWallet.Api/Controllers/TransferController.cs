@@ -6,6 +6,7 @@ using P2PWallet.Services.Data;
 using P2PWallet.Services.Interfaces;
 using P2PWallet.Models.Entities;
 using P2PWallet.Services.Services;
+using static P2PWallet.Models.DataObjects.UserObject;
 
 namespace P2PWallet.Api.Controllers
 {
@@ -93,6 +94,15 @@ namespace P2PWallet.Api.Controllers
             // var result2 = await _pdfServices.PdfGenerator(result);
 
             //return result;
+        }
+
+        [HttpPost("FundForeignCurrrency")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<IActionResult> FundForeignCurrrency(TransferSDto transfer)
+        {
+            var result = await _transferService.FundForeignCurrrency(transfer);
+
+            return Ok(result);
         }
     }
 }

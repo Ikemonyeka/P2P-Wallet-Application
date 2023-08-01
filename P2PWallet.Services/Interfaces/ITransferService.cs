@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using static P2PWallet.Models.DataObjects.UserObject;
 
 namespace P2PWallet.Services.Interfaces
 {
@@ -17,5 +18,6 @@ namespace P2PWallet.Services.Interfaces
         Task<object> GetDebitUser();
         Task<List<TransferView>> GetTransferHistory();
         Task<List<TransferView>> GetTransferHistoryByDate(PdfDto pdfDto);
+        Task<UserView> FundForeignCurrrency(TransferSDto transfer);
     }
 }
