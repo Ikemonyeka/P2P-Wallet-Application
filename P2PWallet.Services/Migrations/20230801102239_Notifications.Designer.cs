@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PWallet.Services.Data;
 
@@ -11,9 +12,11 @@ using P2PWallet.Services.Data;
 namespace P2PWallet.Services.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230801102239_Notifications")]
+    partial class Notifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,12 +99,7 @@ namespace P2PWallet.Services.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("userId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("userId");
 
                     b.ToTable("Notifications");
                 });
@@ -305,17 +303,6 @@ namespace P2PWallet.Services.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("P2PWallet.Models.Entities.Notifications", b =>
-                {
-                    b.HasOne("P2PWallet.Models.Entities.User", "User")
-                        .WithMany("Notifications")
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("P2PWallet.Models.Entities.PaystackFund", b =>
                 {
                     b.HasOne("P2PWallet.Models.Entities.User", "User")
@@ -358,8 +345,6 @@ namespace P2PWallet.Services.Migrations
             modelBuilder.Entity("P2PWallet.Models.Entities.User", b =>
                 {
                     b.Navigation("Account");
-
-                    b.Navigation("Notifications");
 
                     b.Navigation("PaystackFunds");
 

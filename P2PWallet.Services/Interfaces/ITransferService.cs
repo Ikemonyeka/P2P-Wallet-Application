@@ -14,7 +14,7 @@ namespace P2PWallet.Services.Interfaces
     public interface ITransferService
     {
         Task<LoginView> Transaction(TransferDto transfer);
-        Task<ActionResult<object>> TransactionVerify(string transfer);
+        Task<ActionResult<object>> TransactionVerify(TransferVerify transferVerify);
         Task<object> GetDebitUser();
         Task<List<TransferView>> GetTransferHistory();
         Task<List<TransferView>> GetTransferHistoryByDate(PdfDto pdfDto);

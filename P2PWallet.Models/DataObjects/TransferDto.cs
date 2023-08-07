@@ -23,8 +23,16 @@ namespace P2PWallet.Models.DataObjects
     }
     public class TransferDto
     {
+        public string SourceAccountNo { get; set; } = string.Empty;
         public string? BeneficiaryAccountNo { get; set; } = string.Empty;
         public decimal Amount { get; set; }
+
+    }
+
+    public class TransferVerify
+    {
+        public string SourceAccountNo { get; set; } = string.Empty;
+        public string? BeneficiaryAccountNo { get; set; } = string.Empty;
 
     }
 

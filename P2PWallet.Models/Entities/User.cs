@@ -28,5 +28,6 @@ namespace P2PWallet.Models.Entities
         public virtual SecurityQuestion SecurityQuestions { get; set; }
         public virtual List<Transfer> Transfers { get; set; }
         public virtual List<PaystackFund> PaystackFunds { get; set;}
+        public virtual List<Notifications> Notifications { get; set; }
     }
 }

@@ -32,13 +32,15 @@ namespace P2PWallet.Services.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService _emailService;
         private readonly ILogger<TransferService> _logger;
+        private readonly INotificationService _notificationService;
 
-        public TransferService(DataContext context, IHttpContextAccessor httpContextAccessor, IEmailService emailService,ILogger<TransferService> logger)
+        public TransferService(DataContext context, IHttpContextAccessor httpContextAccessor, IEmailService emailService,ILogger<TransferService> logger, INotificationService notificationService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _emailService = emailService;
             _logger = logger;
+            _notificationService = notificationService;
             _logger.LogDebug("NLog injected into TransferService");
         }
 
@@ -175,22 +177,49 @@ namespace P2PWallet.Services.Services
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
 
-                var data = await _context.Accounts.Where(checkId => checkId.Id == userID).FirstAsync();
+                //var data = await _context.Accounts.Where(checkId => checkId.Id == userID).FirstAsync();
+
+
+                var data = await _context.Accounts.Where(i => i.AccountNo == transfer.SourceAccountNo).FirstAsync();
                 if (data == null)
                 {
+                    transfers.message = "Invalid account number";
+                    transfers.status = false;
                     return transfers;
                 }
+
+                var data2 = await _context.Accounts.Where(i => i.AccountNo == transfer.BeneficiaryAccountNo).FirstAsync();
+                if (data2 == null)
+                {
+                    transfers.message = "Invalid account number";
+                    transfers.status = false;
+                    return transfers;
+                }
+
+                if(data.userId == data2.userId)
+                {
+                    transfers.message = "You cannot transfer to yourself, go to fund and do that";
+                    transfers.status = false;
+                    return transfers;
+                }
+
+                if (data.Currency != data2.Currency)
+                {
+                    transfers.message = "You cannot transfer to a different currency";
+                    transfers.status = false;
+                    return transfers;
+                }
+
                 var sendEmail = await _context.Users
                 .Where(r => r.userId == userID).FirstAsync();
 
-                var data2 = await _context.Accounts.Where(checkAcc => checkAcc.AccountNo == transfer.BeneficiaryAccountNo).FirstAsync();
-                if (data2 == null)
-                {
-                    return transfers;
-                }
+
 
                 var receivEmail = await _context.Accounts
                 .Where(r => r.AccountNo == transfer.BeneficiaryAccountNo).FirstAsync();
+
+                var CreditUser = await _context.Users
+                .Where(r => r.userId == receivEmail.userId).FirstAsync();
 
                 var failedDTransfer = data.Balance;
                 var failedCTransfer = data2.Balance;
@@ -241,14 +270,14 @@ namespace P2PWallet.Services.Services
                 senderEmailDto.DUsername = sendEmail.Username;
                 senderEmailDto.Date = emailDate;
                 senderEmailDto.Reference = newTransfer.Reference;
-                senderEmailDto.CreditName = receivEmail.User.firstName + " " + receivEmail.User.lastName;
+                senderEmailDto.CreditName = CreditUser.firstName + " " + CreditUser.lastName;
                 senderEmailDto.TransferAmount = newTransfer.Amount.ToString();
                 senderEmailDto.CurrentBalance = data.Balance.ToString();
 
 
                 receiverEmailDto.receiverEmail = receivEmail.User.Email;
                 receiverEmailDto.Subject = newTransfer.Amount.ToString();
-                receiverEmailDto.CUsername = receivEmail.User.Username;
+                receiverEmailDto.CUsername = CreditUser.Username;
                 receiverEmailDto.Date = emailDate;
                 receiverEmailDto.Reference = newTransfer.Reference;
                 receiverEmailDto.DebitName = sendEmail.firstName + " " + sendEmail.lastName;
@@ -270,6 +299,8 @@ namespace P2PWallet.Services.Services
 
                 var userOutput = await _context.SaveChangesAsync();
 
+                await _notificationService.TransferNotification(sendEmail.Username, data.Currency, transfer.Amount, CreditUser.userId);
+
                 transfers.message = "Transfer Successful";
                 transfers.status = true;
 
@@ -286,7 +317,7 @@ namespace P2PWallet.Services.Services
             }
         }
 
-        public async Task<ActionResult<object>> TransactionVerify(string transfer)
+        public async Task<ActionResult<object>> TransactionVerify(TransferVerify transferVerify)
         {    
             //User users = new User();
             LoginView view = new LoginView();
@@ -302,7 +333,7 @@ namespace P2PWallet.Services.Services
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
 
-                var data = await _context.Accounts.Where(checkId => checkId.userId == userID).FirstAsync();
+                var data = await _context.Accounts.Where(checkId => checkId.AccountNo == transferVerify.SourceAccountNo).FirstAsync();
                 if (data == null)
                 {
                     view.status = false;
@@ -311,17 +342,34 @@ namespace P2PWallet.Services.Services
                     return view;
                 }
 
+                var data2 = await _context.Accounts.Where(checkId => checkId.AccountNo == transferVerify.BeneficiaryAccountNo).FirstAsync();
+                if (data2 == null)
+                {
+                    view.status = false;
+                    view.message = "No one is logged in";
+
+                    return view;
+                }
+
+                if (data.userId == data2.userId)
+                {
+                    view.status = false;
+                    view.message = "You cannot transfer money to yourself, you can fund it from the dashboard or the fund E-card tab";
+
+                    return view;
+                }
+
                 Transfer newTransfer = new Transfer
                 {
-                    BeneficiaryAccountNo = transfer
+                    BeneficiaryAccountNo = transferVerify.BeneficiaryAccountNo
                 };
 
                 var userData = await _context.Accounts
-                   .Where(userInfo => userInfo.AccountNo == transfer)
+                   .Where(userInfo => userInfo.AccountNo == transferVerify.BeneficiaryAccountNo)
                        .Select(userInfo => new RecieverDetails
                        {
                            ReceiverName = userInfo.User.firstName + " " + userInfo.User.lastName,
-                           ReceiverAccountNo = transfer
+                           ReceiverAccountNo = transferVerify.BeneficiaryAccountNo
                        })  
                    .FirstOrDefaultAsync();
 
@@ -331,14 +379,6 @@ namespace P2PWallet.Services.Services
                 {
                     view.status = false;
                     view.message = "This account number cannot be found";
-
-                    return view;
-                }
-
-                if (transfer == data.AccountNo)     
-                {
-                    view.status = false;
-                    view.message = "You cannot transfer money to yourself";
 
                     return view;
                 }

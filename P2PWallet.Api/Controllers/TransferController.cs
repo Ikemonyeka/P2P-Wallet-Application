@@ -56,9 +56,9 @@ namespace P2PWallet.Api.Controllers
 
         [HttpPost("VerifyBeneficiary")]
         [ProducesResponseType(200), Authorize]
-        public async Task<ActionResult<object>> TransactionVerify(string transfer)
+        public async Task<ActionResult<object>> TransactionVerify(TransferVerify transferVerify)
         {
-            var result = await _transferService.TransactionVerify(transfer);
+            var result = await _transferService.TransactionVerify(transferVerify);
 
             return Ok(result);
         }

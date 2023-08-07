@@ -272,7 +272,6 @@ namespace P2PWallet.Services.Services
                 view.message = "Login Succesful";
                 view.data = token;
 
-
                 return view;
             }
             catch (Exception ex)
@@ -311,6 +310,12 @@ namespace P2PWallet.Services.Services
                     Currency = userInfo.Currency
                 })
                 .ToListAsync();
+
+                var change = await _context.Users.Where(x => x.userId == 2).FirstOrDefaultAsync();
+
+                change.VerifiedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
 
 
                 foreach (var x in userData)
@@ -908,7 +913,7 @@ namespace P2PWallet.Services.Services
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
 
                 var userData = await _context.Users
-                .Where(userInfo => userInfo.userId == userID).FirstAsync();
+                .Where(userInfo => userInfo.userId == 1).FirstAsync();
 
 
                 if (userData.ProfilePhoto == null)
@@ -993,7 +998,7 @@ namespace P2PWallet.Services.Services
             userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
 
             var currency = await _context.currencies.ToListAsync();
-            var userCurrency = await _context.Accounts.Where(x => x.userId == 1).ToListAsync();
+            var userCurrency = await _context.Accounts.Where(x => x.userId == userID).ToListAsync();
             var test = await _context.currencies.ToListAsync();
 
             //currency.ForEach(w => wallet.Add(new CreateNewWallet
