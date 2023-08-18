@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PWallet.Services.Data;
 
@@ -11,9 +12,11 @@ using P2PWallet.Services.Data;
 namespace P2PWallet.Services.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230818135043_editLast")]
+    partial class editLast
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,10 +139,10 @@ namespace P2PWallet.Services.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("DescriptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LockedUnlockedUserId")
                         .HasColumnType("int");
 
                     b.Property<int>("userId")
@@ -147,11 +150,11 @@ namespace P2PWallet.Services.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DescriptionId");
+                    b.HasIndex("LockedUnlockedUserId");
 
                     b.HasIndex("userId");
 
-                    b.ToTable("LockedUnlockedDescriptions");
+                    b.ToTable("LockedUnlockedAccountsDescriptions");
                 });
 
             modelBuilder.Entity("P2PWallet.Models.Entities.LockedUnlockedUserDescription", b =>
@@ -409,7 +412,7 @@ namespace P2PWallet.Services.Migrations
                 {
                     b.HasOne("P2PWallet.Models.Entities.LockedUnlockedUserDescription", "LockedUnlockedUser")
                         .WithMany("LockedUnlockedDescriptions")
-                        .HasForeignKey("DescriptionId")
+                        .HasForeignKey("LockedUnlockedUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

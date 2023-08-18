@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PWallet.Services.Data;
 
@@ -11,9 +12,11 @@ using P2PWallet.Services.Data;
 namespace P2PWallet.Services.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230808093209_adminUpdate")]
+    partial class adminUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,10 +66,7 @@ namespace P2PWallet.Services.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsLoggedIn")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastLogin")
+                    b.Property<DateTime>("IsLoggedIn")
                         .HasColumnType("datetime2");
 
                     b.Property<byte[]>("PasswordHash")
@@ -126,49 +126,6 @@ namespace P2PWallet.Services.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("currencies");
-                });
-
-            modelBuilder.Entity("P2PWallet.Models.Entities.LockedUnlockedAccountsDescriptions", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DescriptionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("userId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DescriptionId");
-
-                    b.HasIndex("userId");
-
-                    b.ToTable("LockedUnlockedDescriptions");
-                });
-
-            modelBuilder.Entity("P2PWallet.Models.Entities.LockedUnlockedUserDescription", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Descriptions");
                 });
 
             modelBuilder.Entity("P2PWallet.Models.Entities.Notifications", b =>
@@ -368,9 +325,6 @@ namespace P2PWallet.Services.Migrations
                     b.Property<DateTime?>("ResetTokenExpires")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -401,25 +355,6 @@ namespace P2PWallet.Services.Migrations
                         .HasForeignKey("userId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("P2PWallet.Models.Entities.LockedUnlockedAccountsDescriptions", b =>
-                {
-                    b.HasOne("P2PWallet.Models.Entities.LockedUnlockedUserDescription", "LockedUnlockedUser")
-                        .WithMany("LockedUnlockedDescriptions")
-                        .HasForeignKey("DescriptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("P2PWallet.Models.Entities.User", "User")
-                        .WithMany("LockedUnlockedDescriptions")
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LockedUnlockedUser");
 
                     b.Navigation("User");
                 });
@@ -474,16 +409,9 @@ namespace P2PWallet.Services.Migrations
                     b.Navigation("DebitUser");
                 });
 
-            modelBuilder.Entity("P2PWallet.Models.Entities.LockedUnlockedUserDescription", b =>
-                {
-                    b.Navigation("LockedUnlockedDescriptions");
-                });
-
             modelBuilder.Entity("P2PWallet.Models.Entities.User", b =>
                 {
                     b.Navigation("Account");
-
-                    b.Navigation("LockedUnlockedDescriptions");
 
                     b.Navigation("Notifications");
 

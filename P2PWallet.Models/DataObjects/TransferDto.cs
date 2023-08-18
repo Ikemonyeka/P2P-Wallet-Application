@@ -20,6 +20,7 @@ namespace P2PWallet.Models.DataObjects
         public string Status { get; set; } = string.Empty;
         public string Date { get; set; }
         public string TransactionType { get; set; }
+        public string Currency { get; set; }
     }
     public class TransferDto
     {

@@ -23,5 +23,8 @@ namespace P2PWallet.Services.Data
         public DbSet<SeedSecurityQuestion> seedSecurityQuestions { get; set; }
         public DbSet<Currencies> currencies { get; set; }
         public DbSet<Notifications> Notifications { get; set; }
+        public DbSet<Admin> Admin { get; set; }
+        public DbSet<LockedUnlockedUserDescription> Descriptions { get; set; }
+        public DbSet<LockedUnlockedAccountsDescriptions> LockedUnlockedDescriptions { get; set; }
     }
 }

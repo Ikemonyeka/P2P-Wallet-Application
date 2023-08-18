@@ -90,8 +90,6 @@ namespace P2PWallet.Services.Services
 
                 throw;
             }
-
-           
         }
     }
 }

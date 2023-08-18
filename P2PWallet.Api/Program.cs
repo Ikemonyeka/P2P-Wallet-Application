@@ -77,6 +77,7 @@ namespace P2PWallet.Api
                 builder.Services.AddScoped<INotificationService, NotificationService>();
                 builder.Services.AddScoped<IPdfServices, PdfService>();
                 builder.Services.AddScoped<IExcelService, ExcelService>();
+                builder.Services.AddScoped<IAdminService, AdminService>();
                 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
                 builder.Services.AddHttpContextAccessor();
@@ -140,6 +141,8 @@ namespace P2PWallet.Api
                 {
                     endpoints.MapHub<SignalHub>("/alert");
                 });
+
+                app.descriptionSeed();
 
                 app.SeedSecurityQs();
 

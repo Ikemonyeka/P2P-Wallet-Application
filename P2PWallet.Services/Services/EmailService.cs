@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static P2PWallet.Models.DataObjects.AdminDto;
 using static P2PWallet.Models.DataObjects.PaystackFundObject;
 using static P2PWallet.Models.DataObjects.UserObject;
 
@@ -219,6 +220,92 @@ namespace P2PWallet.Services.Services
 
             using var smtp = new SmtpClient();
             smtp.Connect(_configuration.GetSection("EmailDetails:EmailHost").Value, 2525, SecureSocketOptions.StartTls);
+            smtp.Authenticate(_configuration.GetSection("EmailDetails:EmailUsername").Value, _configuration.GetSection("EmailDetails:EmailPassword").Value);
+            smtp.Send(email);
+            smtp.Disconnect(true);
+        }
+
+        public async Task NewAdminEmail(string username, string password, string userEmail)
+        {
+            var Template = _configuration.GetSection("EmailDetails:NewAdminTemp").Value;
+
+            if (Template == null)
+            {
+
+            }
+
+            string HtmlBody = "";
+            StreamReader reader = new StreamReader(Template);
+            HtmlBody = reader.ReadToEnd();
+            HtmlBody = HtmlBody.Replace("{Username}", username);
+            HtmlBody = HtmlBody.Replace("{Password}", password);
+
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EmailDetails:DefaultEmail").Value));
+            email.To.Add(MailboxAddress.Parse(userEmail));
+            email.Subject = "Account Created";
+            email.Body = new TextPart("html") { Text = HtmlBody };
+
+            using var smtp = new SmtpClient();
+            smtp.Connect(_configuration.GetSection("EmailDetails:EmailHost").Value, 2525, SecureSocketOptions.StartTls);
+            smtp.Authenticate(_configuration.GetSection("EmailDetails:EmailUsername").Value, _configuration.GetSection("EmailDetails:EmailPassword").Value);
+            smtp.Send(email);
+            smtp.Disconnect(true);
+
+        }
+
+        public async Task LockedAccountEmail(string description, string userEmail)
+        {
+            var Template = _configuration.GetSection("EmailDetails:LockedAccountTemp").Value;
+
+            if (Template == null)
+            {
+
+            }
+
+            //var userInfo = await 
+
+            string HtmlBody = "";
+            StreamReader reader = new StreamReader(Template);
+            HtmlBody = reader.ReadToEnd();
+            HtmlBody = HtmlBody.Replace("{Description}", description);
+
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EmailDetails:DefaultEmail").Value));
+            email.To.Add(MailboxAddress.Parse(userEmail));
+            email.Subject = "Account Suspended";
+            email.Body = new TextPart(TextFormat.Html) { Text = HtmlBody };
+
+            using var smtp = new SmtpClient();
+            smtp.Connect(_configuration.GetSection("EmailDetails:EmailHost").Value, 587, SecureSocketOptions.StartTls);
+            smtp.Authenticate(_configuration.GetSection("EmailDetails:EmailUsername").Value, _configuration.GetSection("EmailDetails:EmailPassword").Value);
+            smtp.Send(email);
+            smtp.Disconnect(true);
+        }
+
+        public async Task UnlockedEmail(string userEmail)
+        {
+            var Template = _configuration.GetSection("EmailDetails:UnlockedAccountTemp").Value;
+
+            if (Template == null)
+            {
+
+            }
+
+            //var userInfo = await 
+
+            string HtmlBody = "";
+            StreamReader reader = new StreamReader(Template);
+            HtmlBody = reader.ReadToEnd();
+
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EmailDetails:DefaultEmail").Value));
+            email.To.Add(MailboxAddress.Parse(userEmail));
+            email.Subject = "Account Suspended";
+            email.Body = new TextPart(TextFormat.Html) { Text = HtmlBody };
+
+            using var smtp = new SmtpClient();
+            smtp.Connect(_configuration.GetSection("EmailDetails:EmailHost").Value, 587, SecureSocketOptions.StartTls);
             smtp.Authenticate(_configuration.GetSection("EmailDetails:EmailUsername").Value, _configuration.GetSection("EmailDetails:EmailPassword").Value);
             smtp.Send(email);
             smtp.Disconnect(true);

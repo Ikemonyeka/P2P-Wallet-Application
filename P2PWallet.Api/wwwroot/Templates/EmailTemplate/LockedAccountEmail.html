@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Suspension Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-radius: 5px;
+            margin-top: 50px;
+        }
+
+        .header {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .contact-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .contact-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .call-button {
+            background-color: #060E57;
+            color: #ffffff;
+        }
+
+        .email-button {
+            background-color: #060E57;
+            color: #ffffff;
+        }
+
+        .contact-button:hover {
+            filter: brightness(0.9);
+        }
+
+        a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Account Suspended</div>
+        <div class="message">
+            We're sorry, but your account has been temporarily suspended due to suspicious activity. To resolve this issue or for further assistance, please contact our customer care team.
+        </div>
+        <div class="contact-buttons">
+            <a href="tel:1-800-123-4567" class="contact-button call-button">Call Customer Care</a>
+            <a href="mailto:customercare@example.com" class="contact-button email-button">Email Customer Care</a>
+        </div>
+    </div>
+</body>
+</html>

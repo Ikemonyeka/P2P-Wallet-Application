@@ -250,6 +250,13 @@ namespace P2PWallet.Services.Services
                     return view;
                 }
 
+                if(data.Status == false)
+                {
+                    view.status = false;
+                    view.message = "Account Is Locked, Reach out to customer care f this is strange";
+                    return view;
+                }
+
                 if (data.VerifiedAt == null)
                 {
                     view.status = false;

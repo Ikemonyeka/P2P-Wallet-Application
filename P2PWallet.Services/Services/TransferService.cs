@@ -83,9 +83,15 @@ namespace P2PWallet.Services.Services
                     Amount = transferInfo.Amount,
                     Status = transferInfo.Status,
                     DebitUserId = transferInfo.DebitUserId,
-                    BeneficiaryUserId = transferInfo.BeneficiaryUserId
+                    BeneficiaryUserId = transferInfo.BeneficiaryUserId,
                 })
                 .ToListAsync();
+
+                foreach(var t in transferData)
+                {
+                    var x = await _context.Accounts.Where(acc => acc.AccountNo == t.BeneficiaryAccountNo).FirstOrDefaultAsync();
+                    t.Currency = x.Currency;
+                }
 
                 foreach (var transferInfos in transferData)
                 {
