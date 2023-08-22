@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -358,6 +359,25 @@ namespace P2PWallet.Services.Services
             }
 
             return new ResponseMessageModel<bool> { status = true, message = "Completed", data = true };
+        }
+
+        public async Task<ResponseMessageModel<bool>> SetAdminPassword(AdminPassword adminpassword)
+        {
+            var admin = await _context.Admin.Where(x => x.Username == adminpassword.username).FirstOrDefaultAsync();
+
+            if(admin == null) return new ResponseMessageModel<bool> { status = false, message = $"username or password incorrect", data = false };
+            
+            if(adminpassword.password != adminpassword.cpassword) return new ResponseMessageModel<bool> { status = false, message = $"passwords do not match", data = false };
+
+            CreatePasswordHash(adminpassword.password, out byte[] passwordHash, out byte[] passwordSalt);
+
+            admin.PasswordHash = passwordHash;
+            admin.PasswordSalt = passwordSalt;
+            admin.LastLogin = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return new ResponseMessageModel<bool> { status = true, message = $"passsword has been updated successfully", data = true };
         }
     }
 }

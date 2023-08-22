@@ -101,5 +101,14 @@ namespace P2PWallet.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("SetAdminPassword")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> SetAdminPassword(AdminPassword adminPassword)
+        {
+            var result = await _adminService.SetAdminPassword(adminPassword);
+
+            return Ok(result);
+        }
     }
 }

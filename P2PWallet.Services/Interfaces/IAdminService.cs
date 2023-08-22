@@ -19,5 +19,6 @@ namespace P2PWallet.Services.Interfaces
         Task<ResponseMessageModel<bool>> EnableDisableProfile(profileStatus profileStatus);
         Task<object> GetDescriptions();
         Task<ResponseMessageModel<bool>> DescriptionOfLU(DescriptionLU descriptionLU);
+        Task<ResponseMessageModel<bool>> SetAdminPassword(AdminPassword adminpassword);
     }
 }

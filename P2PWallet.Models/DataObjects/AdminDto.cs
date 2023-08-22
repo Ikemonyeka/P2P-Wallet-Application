@@ -80,5 +80,12 @@ namespace P2PWallet.Models.DataObjects
             public string description { get; set; } = string.Empty;
             public bool status { get; set; }
         }
+
+        public class AdminPassword
+        {
+            public string username { get; set; } = string.Empty;
+            public string password { get; set; } = string.Empty;
+            public string cpassword { get; set; } = string.Empty;
+        }
     }
 }
