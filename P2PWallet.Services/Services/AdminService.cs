@@ -9,6 +9,7 @@ using P2PWallet.Models.DataObjects;
 using P2PWallet.Models.Entities;
 using P2PWallet.Services.Data;
 using P2PWallet.Services.Interfaces;
+using P2PWallet.Services.Migrations;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -284,7 +285,7 @@ namespace P2PWallet.Services.Services
         public async Task<object> GetUsers()
         {
             allUsers u = new allUsers();
-            var users = await _context.Users.Select(x => new allUsers
+            var users = await _context.Users.Where(x => x.Status == false).Select(x => new allUsers
             {
                 user = x.Username,
                 email = x.Email,
@@ -348,6 +349,8 @@ namespace P2PWallet.Services.Services
                 Date = DateTime.UtcNow
             };
 
+            await _context.AddAsync(lockedUnlocked);
+
             await _context.SaveChangesAsync();
 
             if (descriptionLU.status == false)
@@ -378,6 +381,17 @@ namespace P2PWallet.Services.Services
             await _context.SaveChangesAsync();
 
             return new ResponseMessageModel<bool> { status = true, message = $"passsword has been updated successfully", data = true };
+        }
+
+        public async Task<object> FindUser(string identifier)
+        {
+            var users = await _context.Users.Where(x => x.Username == identifier || x.firstName == identifier || 
+            x.lastName == identifier).FirstOrDefaultAsync();
+
+            if (users == null) return new ResponseMessageModel<bool> { status = false, message = $"No user found", data = false };
+
+            return users;
+
         }
     }
 }

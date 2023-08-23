@@ -20,5 +20,6 @@ namespace P2PWallet.Services.Interfaces
         Task<object> GetDescriptions();
         Task<ResponseMessageModel<bool>> DescriptionOfLU(DescriptionLU descriptionLU);
         Task<ResponseMessageModel<bool>> SetAdminPassword(AdminPassword adminpassword);
+        Task<object> FindUser(string identifier);
     }
 }
