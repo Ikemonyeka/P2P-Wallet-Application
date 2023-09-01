@@ -20,5 +20,6 @@ namespace P2PWallet.Models.Entities
         public bool Status { get; set; } 
         public DateTime? LastLogin { get; set; }
         public bool IsLoggedIn { get; set; }
+        public virtual List<Chat> Chats { get; set; }
     }
 }

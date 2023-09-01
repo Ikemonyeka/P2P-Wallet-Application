@@ -87,5 +87,18 @@ namespace P2PWallet.Models.DataObjects
             public string password { get; set; } = string.Empty;
             public string cpassword { get; set; } = string.Empty;
         }
+
+        public class Pagination
+        {
+            public List<allUsers> users { get; set; } = new List<allUsers>();
+            public int pages { get; set; }
+            public int currentpage { get; set; }
+        }
+
+        public class PaginationUserCards
+        {
+            
+            public Pagination Pagination { get; set; }
+        }
     }
 }

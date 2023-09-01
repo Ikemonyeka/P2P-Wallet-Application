@@ -27,5 +27,6 @@ namespace P2PWallet.Services.Data
         public DbSet<LockedUnlockedUserDescription> Descriptions { get; set; }
         public DbSet<LockedUnlockedAccountsDescriptions> LockedUnlockedDescriptions { get; set; }
         public DbSet<GeneralLedger> generalLedgers { get; set; }
+        public DbSet<Chat> Chat { get; set; }
     }
 }

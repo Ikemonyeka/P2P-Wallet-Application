@@ -34,33 +34,6 @@ namespace P2PWallet.Services.Interfaces
         Task<object> CreateAvailabeCurrency();
         Task<UserView> CreateNewWallet(string currency);
         Task<object> GetConversion();
+        Task<object> CurrentUserForChat();
     }
 }
-
-
-//public async Task<LoginView> GetVToken()
-//{
-//    User user = new User();
-//    LoginView view = new LoginView();
-//    VerifyEmailDto verifyEmailDto = new VerifyEmailDto();
-
-//    var data = await _context.Users.Where(tokenCheck => tokenCheck.Email == verifyEmailDto.Email)
-//        .Select(tokenCheck => new VerifyEmailDto
-//        {
-//            Token = tokenCheck.VerificationToken
-//        })
-//        .FirstAsync();
-
-//    if (data == null)
-//    {
-//        view.status = false;
-//        view.message = "Registration/Token Error";
-//        return view;
-//    }
-
-//    view.status = true;
-//    view.message = data.ToString();
-
-//    return view;
-
-//}

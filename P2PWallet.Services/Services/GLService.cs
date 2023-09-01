@@ -33,7 +33,7 @@ namespace P2PWallet.Services.Services
         {
             try
             {
-                var isExists = await _context.generalLedgers.Where(x => x.GLName == createGL.glName).FirstOrDefaultAsync();
+                var isExists = await _context.generalLedgers.Where(x => x.GLName == createGL.glName && x.Currency == createGL.glCurrency).FirstOrDefaultAsync();
 
                 if (isExists != null) return new ResponseMessageModel<bool> { status = false, message = "GL Name already exists", data = false };
 

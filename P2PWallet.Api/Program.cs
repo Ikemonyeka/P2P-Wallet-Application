@@ -78,7 +78,8 @@ namespace P2PWallet.Api
                 builder.Services.AddScoped<IPdfServices, PdfService>();
                 builder.Services.AddScoped<IExcelService, ExcelService>();
                 builder.Services.AddScoped<IAdminService, AdminService>();
-                builder.Services.AddScoped<IGLService, GLService>();   
+                builder.Services.AddScoped<IGLService, GLService>();
+                builder.Services.AddScoped<IChatService, ChatService>();
                 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
                 builder.Services.AddHttpContextAccessor();

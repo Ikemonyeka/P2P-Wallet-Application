@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PWallet.Services.Data;
 
@@ -11,9 +12,11 @@ using P2PWallet.Services.Data;
 namespace P2PWallet.Services.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230825091456_chaat")]
+    partial class chaat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,6 +117,7 @@ namespace P2PWallet.Services.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("adminId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("date")
@@ -476,11 +480,13 @@ namespace P2PWallet.Services.Migrations
             modelBuilder.Entity("P2PWallet.Models.Entities.Chat", b =>
                 {
                     b.HasOne("P2PWallet.Models.Entities.Admin", "Admin")
-                        .WithMany("Chats")
-                        .HasForeignKey("adminId");
+                        .WithMany()
+                        .HasForeignKey("adminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("P2PWallet.Models.Entities.User", "User")
-                        .WithMany("Chats")
+                        .WithMany()
                         .HasForeignKey("userId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -559,11 +565,6 @@ namespace P2PWallet.Services.Migrations
                     b.Navigation("DebitUser");
                 });
 
-            modelBuilder.Entity("P2PWallet.Models.Entities.Admin", b =>
-                {
-                    b.Navigation("Chats");
-                });
-
             modelBuilder.Entity("P2PWallet.Models.Entities.LockedUnlockedUserDescription", b =>
                 {
                     b.Navigation("LockedUnlockedDescriptions");
@@ -572,8 +573,6 @@ namespace P2PWallet.Services.Migrations
             modelBuilder.Entity("P2PWallet.Models.Entities.User", b =>
                 {
                     b.Navigation("Account");
-
-                    b.Navigation("Chats");
 
                     b.Navigation("LockedUnlockedDescriptions");
 

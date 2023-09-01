@@ -111,11 +111,20 @@ namespace P2PWallet.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("FindUser")]
-        [ProducesResponseType(200), Authorize]
-        public async Task<IActionResult> FindUser(string identifier)
+        [HttpGet("FindUser")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> FindUser(int page)
         {
-            var result = await _adminService.FindUser(identifier);
+            var result = await _adminService.FindUser(page);
+
+            return Ok(result);
+        }
+
+        [HttpGet("SearchUser")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> SearchUser()
+        {
+            var result = await _adminService.SearchUser();
 
             return Ok(result);
         }

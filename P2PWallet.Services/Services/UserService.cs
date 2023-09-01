@@ -25,6 +25,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Helpers;
+using static P2PWallet.Models.DataObjects.AdminDto;
 using static P2PWallet.Models.DataObjects.PaystackFundObject;
 using static P2PWallet.Models.DataObjects.UserObject;
 
@@ -1125,6 +1126,31 @@ namespace P2PWallet.Services.Services
             var x = await _context.currencies.ToListAsync();
 
             return x;
+        }
+
+        public async Task<object> CurrentUserForChat()
+        {
+            int userID;
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                return null;
+            }
+
+            userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+            var user = await _context.Users.Where(x => x.userId == userID).Select(x => new UserProfile
+            {
+                Username = x.Username,
+                Email = x.Email,
+                PhoneNumber = x.PhoneNumber,
+                Firstname = x.firstName,
+                Lastname = x.lastName,
+                Address = x.Address
+            }).FirstOrDefaultAsync();
+
+            if (user == null) return new ResponseMessageModel<bool> { status = false, message = "no data", data = false };
+
+            return user;
         }
     }
 }

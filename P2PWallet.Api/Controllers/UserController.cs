@@ -213,6 +213,15 @@ namespace P2PWallet.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("GetChatProfile")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<object> CurrentUserForChat()
+        {
+            var result = await _userService.CurrentUserForChat();
+
+            return Ok(result);
+        }
     }
 }
 

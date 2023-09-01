@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -242,7 +243,7 @@ namespace P2PWallet.Services.Services
 
             //return arrNotes;
 
-            var summary = await _context.Transfers.OrderByDescending(x => x.Date).Take(6)
+            var summary = await _context.Transfers.OrderByDescending(x => x.Date).Take(4)
                 .Select(transferInfo => new TransferView
                 {
                     Date = transferInfo.Date.ToString("MM/dd/yyyy"),
@@ -285,6 +286,7 @@ namespace P2PWallet.Services.Services
         public async Task<object> GetUsers()
         {
             allUsers u = new allUsers();
+
             var users = await _context.Users.Where(x => x.Status == false).Select(x => new allUsers
             {
                 user = x.Username,
@@ -383,15 +385,56 @@ namespace P2PWallet.Services.Services
             return new ResponseMessageModel<bool> { status = true, message = $"passsword has been updated successfully", data = true };
         }
 
-        public async Task<object> FindUser(string identifier)
+        public async Task<object> FindUser(int page)
         {
-            var users = await _context.Users.Where(x => x.Username == identifier || x.firstName == identifier || 
-            x.lastName == identifier).FirstOrDefaultAsync();
 
-            if (users == null) return new ResponseMessageModel<bool> { status = false, message = $"No user found", data = false };
 
-            return users;
 
+            var pageResults = 4f;
+
+            var dataPage = Math.Ceiling(_context.Users.Count() / pageResults);
+
+            var usersList = await _context.Users
+                .Skip((page - 1) * (int)pageResults)
+                .Take((int)pageResults)
+                .Select(x => new allUsers
+                {
+                    user = x.Username,
+                    email = x.Email,
+                    status = x.Status,
+                    dateCreated = x.VerifiedAt.Value.ToString("MM/dd/yyyy")
+                })
+                .ToListAsync();
+
+            if (usersList == null) return new ResponseMessageModel<bool> { status = false, message = $"No user found", data = false };
+
+            var response = new Pagination
+            {
+                users = usersList,
+                pages = (int)pageResults,
+                currentpage = page
+            };
+
+
+            return response;
+
+        }
+
+        public async Task<object> SearchUser()
+        {
+            var usersList = await _context.Users
+                 .Select(x => new allUsers
+                 {
+                     user = x.Username,
+                     email = x.Email,
+                     status = x.Status,
+                     dateCreated = x.VerifiedAt.Value.ToString("MM/dd/yyyy")
+                 })
+                 .ToListAsync();
+
+            if (usersList == null) return new ResponseMessageModel<bool> { status = false, message = $"No user found", data = false };
+
+            return usersList;
         }
     }
 }

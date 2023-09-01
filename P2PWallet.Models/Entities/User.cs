@@ -31,5 +31,6 @@ namespace P2PWallet.Models.Entities
         public virtual List<PaystackFund> PaystackFunds { get; set;}
         public virtual List<Notifications> Notifications { get; set; }
         public virtual List<LockedUnlockedAccountsDescriptions> LockedUnlockedDescriptions { get; set; }
+        public virtual List<Chat> Chats { get; set; }
     }
 }
