@@ -10,5 +10,8 @@ namespace P2PWallet.Models.Entities
     {
         public int id { get; set; }
         public string NameOfDocument { get; set; } = string.Empty;
+        public string FormCode { get; set; } = string.Empty;
+        public bool isEnabled { get; set; }
+        public virtual List<KYCUpload> KYCUploads { get; set; }
     }
 }

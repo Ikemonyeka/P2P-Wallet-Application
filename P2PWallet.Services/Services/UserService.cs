@@ -18,7 +18,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Security.Claims;
+using System.Security.Claims;   
 using System.Security.Cryptography;
 using System.Security.Cryptography.Xml;
 using System.Security.Principal;
@@ -1151,6 +1151,52 @@ namespace P2PWallet.Services.Services
             if (user == null) return new ResponseMessageModel<bool> { status = false, message = "no data", data = false };
 
             return user;
+        }
+
+        public async Task<object> IsKYCVerified()
+        {
+            int userID;
+
+            if (_httpContextAccessor.HttpContext == null) return new ResponseMessageModel<bool> { status = false, message = "no user data", data = false };
+
+            userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+            var user = await _context.kYCUploads.Where(x => x.userId == userID).ToListAsync();
+            //x.Status != false &&
+
+            var list = await _context.KYCRequiredDocuments.Where(x => x.isEnabled == true).ToListAsync();
+
+            //var missingDocuments = list
+            //.Where(requiredDoc => !user.Any(userDoc => userDoc.KycRecId == requiredDoc.id || userDoc.Status == false)).ToList();
+
+            var missingDocuments = list
+            .Where(requiredDoc =>
+                !user.Any(userDoc => userDoc.KycRecId == requiredDoc.id) || user.Any(userDoc => userDoc.KycRecId == requiredDoc.id && userDoc.Status == false))
+            .ToList();
+
+            if (!missingDocuments.Any()) return new ResponseMessageModel<bool> { status = true, message = "KYC is verified or pending", data = true };
+            
+            return new ResponseMessageModel<bool> { status = false, message = "KYC is not verified", data = false };
+            
+        }
+
+        public async Task<object> CompleteKYCUploadedCheck()
+        {
+            int userID;
+
+            if (_httpContextAccessor.HttpContext == null) return new ResponseMessageModel<bool> { status = false, message = "no user data", data = false };
+
+            userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(ClaimTypes.SerialNumber)?.Value);
+
+            var completedUpload = await _context.kYCUploads.Where(x => x.userId == userID && x.Status == true).ToListAsync();
+            var allReq = await _context.KYCRequiredDocuments.Where(x => x.isEnabled == true).ToListAsync();
+
+            if (completedUpload.Count() < allReq.Count())
+            {
+                return new ResponseMessageModel<bool> { status = false, message = "All kyc documents have not been verified yet", data = false };
+            }
+
+            return new ResponseMessageModel<bool> { status = true, message = "All kyc documents have been verified", data = true };
         }
     }
 }

@@ -77,7 +77,7 @@ namespace P2PWallet.Api.Controllers
 
         [HttpPost("ProfileStatus")]
         [ProducesResponseType(200), Authorize]
-        public async Task<IActionResult> EnableDisableProfile(profileStatus profileStatus)
+        public async Task<IActionResult> EnableDisableProfile(setProfileStatus profileStatus)
         {
             var result = await _adminService.EnableDisableProfile(profileStatus);
 
@@ -125,6 +125,15 @@ namespace P2PWallet.Api.Controllers
         public async Task<IActionResult> SearchUser()
         {
             var result = await _adminService.SearchUser();
+
+            return Ok(result);
+        }
+
+        [HttpPost("EnableProfile")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<IActionResult> EnableProfile(setStatusEnabled profileStatus)
+        {
+            var result = await _adminService.EnableProfile(profileStatus);
 
             return Ok(result);
         }

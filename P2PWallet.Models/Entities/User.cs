@@ -25,6 +25,7 @@ namespace P2PWallet.Models.Entities
         public string Address { get; set; } = string.Empty;
         public bool Status { get; set; }
         public byte[]? ProfilePhoto { get; set; }
+        public bool isKYCVerified { get; set; }
         public virtual List<Account> Account { get; set; }
         public virtual SecurityQuestion SecurityQuestions { get; set; }
         public virtual List<Transfer> Transfers { get; set; }
@@ -32,5 +33,6 @@ namespace P2PWallet.Models.Entities
         public virtual List<Notifications> Notifications { get; set; }
         public virtual List<LockedUnlockedAccountsDescriptions> LockedUnlockedDescriptions { get; set; }
         public virtual List<Chat> Chats { get; set; }
+        public virtual List<KYCUpload> KYCUploads { get; set; }
     }
 }

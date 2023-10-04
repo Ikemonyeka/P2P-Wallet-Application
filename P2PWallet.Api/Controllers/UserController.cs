@@ -222,6 +222,24 @@ namespace P2PWallet.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("IsKYCVerified")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<object> IsKYCVerified()
+        {
+            var result = await _userService.IsKYCVerified();
+
+            return Ok(result);
+        }
+
+        [HttpGet("CompleteKYCUploadedCheck")]
+        [ProducesResponseType(200), Authorize]
+        public async Task<object> CompleteKYCUploadedCheck()
+        {
+            var result = await _userService.CompleteKYCUploadedCheck();
+
+            return Ok(result);
+        }
     }
 }
 

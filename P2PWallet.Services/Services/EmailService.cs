@@ -277,7 +277,7 @@ namespace P2PWallet.Services.Services
             email.Body = new TextPart(TextFormat.Html) { Text = HtmlBody };
 
             using var smtp = new SmtpClient();
-            smtp.Connect(_configuration.GetSection("EmailDetails:EmailHost").Value, 587, SecureSocketOptions.StartTls);
+            smtp.Connect(_configuration.GetSection("EmailDetails:EmailHost").Value, 2525, SecureSocketOptions.StartTls);
             smtp.Authenticate(_configuration.GetSection("EmailDetails:EmailUsername").Value, _configuration.GetSection("EmailDetails:EmailPassword").Value);
             smtp.Send(email);
             smtp.Disconnect(true);

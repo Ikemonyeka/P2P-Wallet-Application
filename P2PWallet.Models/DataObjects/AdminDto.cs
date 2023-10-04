@@ -73,6 +73,20 @@ namespace P2PWallet.Models.DataObjects
             public bool status { get; set; }
         }
 
+        public class setProfileStatus
+        {
+            public string username { get; set; } = string.Empty;
+            public string email { get; set; } = string.Empty;
+            public bool status { get; set; }
+        }
+
+        public class setStatusEnabled
+        {
+            public string user { get; set; } = string.Empty;
+            public string email { get; set; } = string.Empty;
+            public bool status { get; set; }
+        }
+
         public class DescriptionLU
         {
             public string user { get; set; } = string.Empty;

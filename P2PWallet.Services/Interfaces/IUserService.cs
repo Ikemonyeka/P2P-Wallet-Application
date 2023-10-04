@@ -35,5 +35,7 @@ namespace P2PWallet.Services.Interfaces
         Task<UserView> CreateNewWallet(string currency);
         Task<object> GetConversion();
         Task<object> CurrentUserForChat();
+        Task<object> IsKYCVerified();
+        Task<object> CompleteKYCUploadedCheck();
     }
 }

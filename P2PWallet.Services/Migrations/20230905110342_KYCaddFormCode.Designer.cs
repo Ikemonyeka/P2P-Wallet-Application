@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PWallet.Services.Data;
 
@@ -11,9 +12,11 @@ using P2PWallet.Services.Data;
 namespace P2PWallet.Services.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230905110342_KYCaddFormCode")]
+    partial class KYCaddFormCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -212,52 +215,9 @@ namespace P2PWallet.Services.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("isEnabled")
-                        .HasColumnType("bit");
-
                     b.HasKey("id");
 
                     b.ToTable("KYCRequiredDocuments");
-                });
-
-            modelBuilder.Entity("P2PWallet.Models.Entities.KYCUpload", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<string>("FileType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("KycRecId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PathName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("Status")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("userId")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("KycRecId");
-
-                    b.HasIndex("userId");
-
-                    b.ToTable("kYCUploads");
                 });
 
             modelBuilder.Entity("P2PWallet.Models.Entities.LockedUnlockedAccountsDescriptions", b =>
@@ -557,25 +517,6 @@ namespace P2PWallet.Services.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("P2PWallet.Models.Entities.KYCUpload", b =>
-                {
-                    b.HasOne("P2PWallet.Models.Entities.KYCRequiredDocuments", "KYCRequiredDocuments")
-                        .WithMany("KYCUploads")
-                        .HasForeignKey("KycRecId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("P2PWallet.Models.Entities.User", "User")
-                        .WithMany("KYCUploads")
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("KYCRequiredDocuments");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("P2PWallet.Models.Entities.LockedUnlockedAccountsDescriptions", b =>
                 {
                     b.HasOne("P2PWallet.Models.Entities.LockedUnlockedUserDescription", "LockedUnlockedUser")
@@ -650,11 +591,6 @@ namespace P2PWallet.Services.Migrations
                     b.Navigation("Chats");
                 });
 
-            modelBuilder.Entity("P2PWallet.Models.Entities.KYCRequiredDocuments", b =>
-                {
-                    b.Navigation("KYCUploads");
-                });
-
             modelBuilder.Entity("P2PWallet.Models.Entities.LockedUnlockedUserDescription", b =>
                 {
                     b.Navigation("LockedUnlockedDescriptions");
@@ -665,8 +601,6 @@ namespace P2PWallet.Services.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Chats");
-
-                    b.Navigation("KYCUploads");
 
                     b.Navigation("LockedUnlockedDescriptions");
 

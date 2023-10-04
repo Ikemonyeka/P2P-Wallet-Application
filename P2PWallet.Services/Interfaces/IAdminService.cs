@@ -16,7 +16,8 @@ namespace P2PWallet.Services.Interfaces
         Task<object> GetCurrencyRate();
         Task<object> GetSummaryTransfersAdmin();
         Task<object> GetUsers();
-        Task<ResponseMessageModel<bool>> EnableDisableProfile(profileStatus profileStatus);
+        Task<ResponseMessageModel<bool>> EnableDisableProfile(setProfileStatus profileStatus);
+        Task<ResponseMessageModel<bool>> EnableProfile(setStatusEnabled profileStatus);
         Task<object> GetDescriptions();
         Task<ResponseMessageModel<bool>> DescriptionOfLU(DescriptionLU descriptionLU);
         Task<ResponseMessageModel<bool>> SetAdminPassword(AdminPassword adminpassword);

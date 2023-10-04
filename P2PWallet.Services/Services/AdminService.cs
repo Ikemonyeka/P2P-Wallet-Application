@@ -314,9 +314,9 @@ namespace P2PWallet.Services.Services
             return users;
         }
 
-        public async Task<ResponseMessageModel<bool>> EnableDisableProfile(profileStatus profileStatus)
+        public async Task<ResponseMessageModel<bool>> EnableDisableProfile(setProfileStatus profileStatus)
         {
-            var user = await _context.Users.Where(x => x.Username == profileStatus.user && x.Email == profileStatus.email).FirstOrDefaultAsync();
+            var user = await _context.Users.Where(x => x.Username == profileStatus.username && x.Email == profileStatus.email).FirstOrDefaultAsync();
 
             if(user == null) return new ResponseMessageModel<bool> { status = false, message = $"user cannot be toggled", data = false };
 
@@ -392,9 +392,9 @@ namespace P2PWallet.Services.Services
 
             var pageResults = 4f;
 
-            var dataPage = Math.Ceiling(_context.Users.Count() / pageResults);
+            var dataPage = Math.Ceiling(_context.Users.Where(x => x.Status == true).Count() / pageResults);
 
-            var usersList = await _context.Users
+            var usersList = await _context.Users.Where(x => x.Status == true)
                 .Skip((page - 1) * (int)pageResults)
                 .Take((int)pageResults)
                 .Select(x => new allUsers
@@ -411,7 +411,7 @@ namespace P2PWallet.Services.Services
             var response = new Pagination
             {
                 users = usersList,
-                pages = (int)pageResults,
+                pages = (int)dataPage,
                 currentpage = page
             };
 
@@ -422,7 +422,7 @@ namespace P2PWallet.Services.Services
 
         public async Task<object> SearchUser()
         {
-            var usersList = await _context.Users
+            var usersList = await _context.Users.Where(x => x.Status == true)
                  .Select(x => new allUsers
                  {
                      user = x.Username,
@@ -435,6 +435,19 @@ namespace P2PWallet.Services.Services
             if (usersList == null) return new ResponseMessageModel<bool> { status = false, message = $"No user found", data = false };
 
             return usersList;
+        }
+
+        public async Task<ResponseMessageModel<bool>> EnableProfile(setStatusEnabled profileStatus)
+        {
+            var user = await _context.Users.Where(x => x.Username == profileStatus.user && x.Email == profileStatus.email).FirstOrDefaultAsync();
+
+            if (user == null) return new ResponseMessageModel<bool> { status = false, message = $"user cannot be toggled", data = false };
+
+            user.Status = profileStatus.status;
+
+            await _context.SaveChangesAsync();
+
+            return new ResponseMessageModel<bool> { status = true, message = $"This users profile has been set to {profileStatus.status}", data = true };
         }
     }
 }
